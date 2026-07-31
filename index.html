@@ -890,7 +890,7 @@ button.ghost:hover{ background: rgba(0,0,0,.05); }
 
     const tx = { id: uid(), itemId:item.id, itemName:item.name, category:item.category, unit:item.unit, type:currentType, qty, ref, reason, batch, stockman, note, ts: Date.now() };
     state.transactions.unshift(tx);
-    pushToSheet(tx);
+    syncAddTransaction(tx, item.stock);
 
     document.getElementById('moveQty').value='';
     document.getElementById('moveRef').value='';
@@ -967,6 +967,7 @@ button.ghost:hover{ background: rgba(0,0,0,.05); }
         removeConfirmId = null;
         renderAll();
         showToast('out', 'CUT DELETED');
+        syncDeleteItem(id);
       }, 'Delete');
     } else {
       removeConfirmId = id;
@@ -1026,6 +1027,7 @@ button.ghost:hover{ background: rgba(0,0,0,.05); }
         overlay.classList.remove('show');
         renderAll();
         showToast('in', 'CUT UPDATED · '+item.name);
+        syncUpdateItem(item);
       }
       return;
     }
@@ -1036,6 +1038,7 @@ button.ghost:hover{ background: rgba(0,0,0,.05); }
     overlay.classList.remove('show');
     renderAll();
     showToast('in', 'NEW CUT ADDED · '+item.name);
+    syncAddItem(item);
   });
 
   // ===== CSV export =====
@@ -1068,47 +1071,174 @@ button.ghost:hover{ background: rgba(0,0,0,.05); }
     showToast('in', 'CSV exported — ready to import into Google Sheets');
   });
 
-  // ===== Google Sheet auto-sync =====
+  // ===== Google Sheet as live database =====
   // Bound to: https://docs.google.com/spreadsheets/d/1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M/edit
-  // Every movement pushes automatically — no toggle, no setup panel.
-  // One-time setup (you, not the dashboard, do this once): deploy the Apps
-  // Script below on that sheet as a Web App, then paste the resulting
-  // /exec URL into WEBAPP_URL right here.
+  // The sheet is the source of truth: cuts + activity are read from it on
+  // load, refreshed on a short interval, and every add/edit/delete/movement
+  // writes straight back to it. No toggle, no setup panel — this is always on.
+  //
+  // One-time setup (you do this once, in your Google account):
+  // 1. Open the sheet → Extensions → Apps Script.
+  // 2. Delete the placeholder code and paste in the script below.
+  // 3. Deploy → New deployment → Web app → Execute as: Me →
+  //    Who has access: Anyone → Deploy → copy the /exec URL.
+  // 4. Paste that URL into WEBAPP_URL right here, replacing the placeholder.
+  // The script auto-creates two tabs the first time it runs: "Items" and "Activity".
   const SHEET_ID = '1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M';
-  const WEBAPP_URL = 'https://docs.google.com/spreadsheets/d/1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M/edit?gid=0#gid=0';
-  /* Apps Script to paste into Extensions → Apps Script on that sheet, then
-     Deploy → New deployment → Web app → Execute as: Me → Who has access: Anyone:
+  const WEBAPP_URL = 'PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE';
+  const POLL_MS = 5000; // how often the dashboard re-checks the sheet ("real-time" here means a 5s refresh, not an instant push — Sheets has no live push channel)
 
-  function doPost(e) {
-    var sheet = SpreadsheetApp.openById('1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M').getSheetByName('Sheet1');
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Date','Reference #','Item','Category','Type','Quantity','Unit','Reason','Batch Code / Production Date','Stockman In-charge','Note']);
-    }
-    var data = JSON.parse(e.postData.contents);
-    sheet.appendRow([
-      new Date(data.ts), data.ref, data.itemName, data.category,
-      data.type, data.qty, data.unit, data.reason, data.batch, data.stockman, data.note || ''
-    ]);
-    return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
-      .setMimeType(ContentService.MimeType.JSON);
+  /* ============ Apps Script — paste this whole block into Extensions → Apps Script ============
+
+  const SHEET_ID = '1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M';
+  const ITEMS_TAB = 'Items';
+  const ACTIVITY_TAB = 'Activity';
+  const ITEM_COLS = ['id','name','category','unit','stock','reorder'];
+  const TX_COLS = ['id','ts','ref','itemId','itemName','category','type','qty','unit','reason','batch','stockman','note'];
+
+  function getSS(){ return SpreadsheetApp.openById(SHEET_ID); }
+
+  function getTab(name, headerCols){
+    var ss = getSS();
+    var sh = ss.getSheetByName(name);
+    if(!sh){ sh = ss.insertSheet(name); }
+    if(sh.getLastRow() === 0){ sh.appendRow(headerCols); }
+    return sh;
   }
-  */
-  function pushToSheet(tx){
-    if(!WEBAPP_URL || WEBAPP_URL.indexOf('PASTE_YOUR') === 0){
-      document.getElementById('syncStatus').textContent = 'Google Sheet sync isn\'t connected yet — add the Web App URL in the code.';
-      document.getElementById('syncStatus').className = 'sync-status off';
+  function itemsSheet(){ return getTab(ITEMS_TAB, ['ID','Name','Category','Unit','Stock','Reorder']); }
+  function activitySheet(){ return getTab(ACTIVITY_TAB, ['ID','Date','Reference #','Item ID','Item','Category','Type','Quantity','Unit','Reason','Batch Code / Production Date','Stockman In-charge','Note']); }
+
+  function rowsToObjects(sh, keys){
+    var data = sh.getDataRange().getValues();
+    var out = [];
+    for (var i = 1; i < data.length; i++){
+      var row = data[i];
+      if (!row[0]) continue;
+      var obj = {};
+      for (var k = 0; k < keys.length; k++){ obj[keys[k]] = row[k]; }
+      out.push(obj);
+    }
+    return out;
+  }
+
+  function findRowById(sh, id){
+    var data = sh.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++){ if (String(data[i][0]) === String(id)) return i + 1; }
+    return -1;
+  }
+
+  function doGet(e){
+    var items = rowsToObjects(itemsSheet(), ['id','name','category','unit','stock','reorder']);
+    var raw = rowsToObjects(activitySheet(), ['id','ts','ref','itemId','itemName','category','type','qty','unit','reason','batch','stockman','note']);
+    var transactions = raw.map(function(t){
+      var d = t.ts instanceof Date ? t.ts.getTime() : new Date(t.ts).getTime();
+      return Object.assign({}, t, { ts: d });
+    });
+    return out({ status:'ok', items: items, transactions: transactions });
+  }
+
+  function doPost(e){
+    var body = JSON.parse(e.postData.contents);
+    if (body.action === 'addItem')        return addItem(body.item);
+    if (body.action === 'updateItem')     return updateItem(body.item);
+    if (body.action === 'deleteItem')     return deleteItem(body.id);
+    if (body.action === 'addTransaction') return addTransaction(body.tx, body.newStock);
+    return out({ status:'error', message:'Unknown action' });
+  }
+
+  function addItem(item){
+    itemsSheet().appendRow([item.id, item.name, item.category, item.unit, item.stock, item.reorder]);
+    return out({ status:'ok' });
+  }
+  function updateItem(item){
+    var sh = itemsSheet();
+    var row = findRowById(sh, item.id);
+    if (row > 0) sh.getRange(row, 1, 1, 6).setValues([[item.id, item.name, item.category, item.unit, item.stock, item.reorder]]);
+    return out({ status:'ok' });
+  }
+  function deleteItem(id){
+    var sh = itemsSheet();
+    var row = findRowById(sh, id);
+    if (row > 0) sh.deleteRow(row);
+    return out({ status:'ok' });
+  }
+  function addTransaction(tx, newStock){
+    activitySheet().appendRow([tx.id, new Date(tx.ts), tx.ref, tx.itemId, tx.itemName, tx.category, tx.type, tx.qty, tx.unit, tx.reason, tx.batch, tx.stockman, tx.note || '']);
+    if (newStock !== undefined && tx.itemId){
+      var sh = itemsSheet();
+      var row = findRowById(sh, tx.itemId);
+      if (row > 0) sh.getRange(row, 5).setValue(newStock);
+    }
+    return out({ status:'ok' });
+  }
+  function out(obj){
+    return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  ============ end Apps Script ============ */
+
+  function sheetConfigured(){ return WEBAPP_URL && WEBAPP_URL.indexOf('PASTE_YOUR') !== 0; }
+
+  function setSyncStatus(text, ok){
+    const el = document.getElementById('syncStatus');
+    el.textContent = text;
+    el.className = 'sync-status ' + (ok ? 'on' : 'off');
+  }
+
+  // ----- read: pull items + transactions from the sheet -----
+  let firstLoadDone = false;
+  function loadFromSheet(){
+    if(!sheetConfigured()){
+      setSyncStatus('Google Sheet database not connected — add the Web App URL in the code (showing local demo data).', false);
       return;
     }
+    fetch(WEBAPP_URL + '?action=getAll', { method:'GET' })
+      .then(r=>r.json())
+      .then(data=>{
+        if(data && data.status==='ok'){
+          state.items = (data.items||[]).map(i=>({
+            id: String(i.id), name: i.name, category: i.category, unit: i.unit,
+            stock: Number(i.stock)||0, reorder: Number(i.reorder)||0
+          }));
+          state.transactions = (data.transactions||[]).map(t=>({
+            id: String(t.id), itemId: String(t.itemId), itemName: t.itemName, category: t.category,
+            unit: t.unit, type: t.type, qty: Number(t.qty)||0, ref: t.ref, reason: t.reason,
+            batch: t.batch, stockman: t.stockman, note: t.note||'', ts: Number(t.ts)||Date.now()
+          })).sort((a,b)=>b.ts-a.ts);
+          renderAll();
+          setSyncStatus('Live · synced from Google Sheet · '+new Date().toLocaleTimeString(), true);
+        } else {
+          setSyncStatus('Google Sheet returned an unexpected response — check the Apps Script deployment.', false);
+        }
+        firstLoadDone = true;
+      })
+      .catch(()=>{
+        setSyncStatus('Could not reach the Google Sheet — check the deployment URL and access settings.', false);
+        firstLoadDone = true;
+      });
+  }
+
+  // ----- write: push a change, then re-pull so the sheet stays the single source of truth -----
+  function sheetPost(payload){
+    if(!sheetConfigured()) return;
     fetch(WEBAPP_URL, {
       method:'POST',
-      mode:'no-cors',
       headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify(tx)
-    }).then(()=>{
-      const statusEl = document.getElementById('syncStatus');
-      statusEl.textContent = 'Synced to Google Sheet · '+new Date().toLocaleTimeString();
-      statusEl.className = 'sync-status on';
-    }).catch(()=>{ showToast('out', 'Could not reach Google Sheet — check the sync connection'); });
+      body: JSON.stringify(payload)
+    }).then(()=>{ loadFromSheet(); })
+      .catch(()=>{ showToast('out', 'Could not reach Google Sheet — check the sync connection'); });
+  }
+
+  function syncAddItem(item){ sheetPost({ action:'addItem', item }); }
+  function syncUpdateItem(item){ sheetPost({ action:'updateItem', item }); }
+  function syncDeleteItem(id){ sheetPost({ action:'deleteItem', id }); }
+  function syncAddTransaction(tx, newStock){ sheetPost({ action:'addTransaction', tx, newStock }); }
+
+  if(sheetConfigured()){
+    loadFromSheet();
+    setInterval(loadFromSheet, POLL_MS);
+  } else {
+    setSyncStatus('Google Sheet database not connected — add the Web App URL in the code (showing local demo data).', false);
   }
 
   // ===== clock =====
