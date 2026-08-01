@@ -3,1254 +3,1143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M. Montesclaros Farms, Inc. — Meat Inventory Ledger</title>
+<title>MMFI Year-over-Year Sales Analysis</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{
+    --ink:#0d0d0d; --ink-soft:#333333; --grey:#666666; --grey-soft:#999999;
+    --line:#dcdcdc; --paper:#f2f2f2; --card:#ffffff;
+    --olive:#8DB600; --olive-dark:#5c8000; --olive-deep:#4a6600;
+    --hover-tan:#f3e7d8; --scroll-tan:#d9c4a3; --cream:#fff8f0;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  html,body{ margin:0; padding:0; }
+  body{
+    min-height:100vh; background:var(--paper); color:var(--ink);
+    font-family:'Georgia','Times New Roman',serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .num-font{ font-family:'Courier New',monospace; }
+  img,svg{ max-width:100%; }
+  svg text{ font-family:'Georgia','Times New Roman',serif; }
+  table{ border-collapse:collapse; width:100%; }
+  th{ cursor:default; user-select:none; }
+  tr:hover td{ background:var(--hover-tan) !important; }
+  ::-webkit-scrollbar{ height:8px; width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--scroll-tan); border-radius:4px; }
+  ::selection{ background:var(--olive); color:#fff8f0; }
 
-:root{
-  --bg: #18140f;
-  --bg-2: #211b14;
-  --paper: #f4ead2;
-  --paper-2: #eadfc2;
-  --ink: #2a2016;
-  --ink-soft: #6b5c47;
-  --line: #d3c19a;
-  --crimson: #a12e22;
-  --crimson-deep: #7c2118;
-  --sage: #52693f;
-  --sage-deep: #3c4d2e;
-  --gold: #b9862f;
-  --apple-green: #7cb342;
-  --c-beef: #a12e22;
-  --c-pork: #c98a5f;
-  --c-chicken: #6b8a45;
-  --c-lamb: #7c5642;
-  --radius: 3px;
-  --font-display: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
-  --font-body: 'Work Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --shadow: 0 10px 30px rgba(0,0,0,.35);
-}
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:4px; min-width:0; }
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:
-    radial-gradient(1200px 600px at 15% -10%, #23261f 0%, transparent 60%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 3px),
-    var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  padding: 22px 16px 60px;
-}
+  .btn{
+    cursor:pointer; border:1px solid var(--olive); background:transparent; color:var(--olive-dark);
+    padding:6px 14px; font-size:12.5px; border-radius:3px; font-family:inherit; letter-spacing:.02em;
+    transition:all .15s; white-space:nowrap;
+  }
+  .btn:hover{ background:var(--olive); color:var(--cream); }
+  .btn.active{ background:var(--olive-dark); color:var(--cream); border-color:var(--olive-dark); }
+  a.btn{ text-decoration:none; display:inline-block; }
 
-.app{ max-width: 1280px; margin: 0 auto; }
+  /* ---- header ---- */
+  .hdr{ background:var(--ink); color:#f2f2f2; padding:26px 20px 22px; border-bottom:4px solid var(--olive); }
+  .hdr-inner{ max-width:1200px; margin:0 auto; }
+  .eyebrow{ font-size:11px; letter-spacing:.2em; color:var(--olive); margin-bottom:6px; text-transform:uppercase; }
+  .hdr h1{ font-size:26px; font-weight:700; letter-spacing:.01em; margin:0; }
+  .hdr .sub{ font-size:13px; color:var(--grey-soft); margin-top:4px; }
 
-/* ===== Header / signboard ===== */
-.board{
-  background: linear-gradient(180deg, var(--bg-2), #16120d);
-  border: 1px solid #362c1f;
-  border-radius: 6px;
-  padding: 22px 26px;
-  margin-bottom: 22px;
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
-}
-.board::after{
-  content:"";
-  position:absolute; inset:0;
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 26px);
-  pointer-events:none;
-}
-.board-inner{
-  display:flex; align-items:center; justify-content:space-between; gap: 20px; flex-wrap: wrap;
-  position: relative; z-index:1;
-}
-.brand{ display:flex; align-items:center; gap:16px; }
-.brand h1{
-  font-family: var(--font-display);
-  font-size: 30px;
-  letter-spacing: 1px;
-  color: var(--apple-green);
-  margin:0; line-height:1.05;
-}
-.brand p{
-  margin: 4px 0 0;
-  color: #ffffff;
-  font-size: 13px;
-  letter-spacing: .5px;
-}
-.brand p.brand-sub{
-  margin-top: 2px;
-  color: #cfead4;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  opacity: .85;
-}
-.board-meta{ text-align:right; }
-#clock{
-  font-family: var(--font-mono);
-  color: var(--paper);
-  font-size: 14px;
-  letter-spacing: .5px;
-  opacity: .85;
-}
-.board-meta .sub{ color:#ffffff; font-size:11px; text-transform:uppercase; letter-spacing:1.5px; margin-top:3px;}
+  /* ---- quick nav ---- */
+  .qnav-wrap{ background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50; }
+  .qnav{ max-width:1200px; margin:0 auto; padding:10px 20px; display:flex; gap:8px; flex-wrap:wrap; }
 
-/* ===== Stats strip ===== */
-.stats{
-  display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 22px;
-}
-.stat-card{
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  position: relative;
-  box-shadow: var(--shadow);
-}
-.stat-card::before{
-  content:"";
-  position:absolute; left:0; top:0; bottom:0; width:4px;
-  background: var(--accent, var(--gold));
-  border-radius: var(--radius) 0 0 var(--radius);
-}
-.stat-label{
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.4px;
-  color: var(--ink-soft);
-  margin: 0 0 6px;
-  font-weight: 600;
-}
-.stat-value{
-  font-family: var(--font-mono);
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--ink);
-}
-.stat-value small{ font-size: 14px; font-weight:500; color: var(--ink-soft); }
-.stat-sub{ font-size:12px; color: var(--ink-soft); margin-top:6px; }
-.stat-card.warn .stat-value{ color: var(--crimson); }
-.stat-card.warn::before{ background: var(--crimson); }
+  /* ---- main ---- */
+  .wrap{ max-width:1200px; margin:0 auto; padding:22px 20px 60px; }
+  .tier{ border-top:6px solid var(--ink); padding-top:22px; margin-top:40px; scroll-margin-top:64px; }
+  .tier:first-of-type{ margin-top:0; }
+  .section-title{ font-size:20px; font-weight:700; color:var(--ink); margin-bottom:2px; }
+  .section-sub{ font-size:12px; color:var(--grey); margin-bottom:14px; }
 
-/* ===== Layout ===== */
-.grid-main{
-  display:grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 18px;
-  align-items:start;
-  margin-bottom: 18px;
-}
-.panel{
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px 20px 20px;
-  box-shadow: var(--shadow);
-}
-.panel-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 12px; flex-wrap:wrap;
-}
-.panel h2{
-  font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 1.2px;
-  margin: 0 0 12px;
-  color: var(--ink);
-  border-bottom: 2px solid var(--ink);
-  padding-bottom: 6px;
-}
-.panel-head h2{ margin-bottom:0; border-bottom:none; padding-bottom:0;}
+  /* ---- kpis ---- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:14px; margin-bottom:22px; }
+  .kpi{ padding:16px 18px; }
+  .kpi .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--grey); margin-bottom:8px; }
+  .kpi .val{ font-size:22px; font-weight:700; line-height:1.15; }
+  .kpi .delta{ font-size:11px; color:var(--grey); margin-top:4px; }
+  .kpi .delta.up{ color:var(--olive-dark); } .kpi .delta.down{ color:#8a3b2b; }
 
-button, .btn{
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 13px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper);
-  padding: 9px 14px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  letter-spacing: .3px;
-  transition: transform .12s ease, background .15s ease;
-}
-button:hover{ background: #3a2c1c; }
-button:active{ transform: translateY(1px); }
-button.ghost{
-  background: transparent; color: var(--ink); border: 1px solid var(--ink-soft);
-}
-button.ghost:hover{ background: rgba(0,0,0,.05); }
+  /* ---- chart cards ---- */
+  .card-pad{ padding:20px 20px 10px; }
+  .card-title{ font-size:15px; font-weight:700; margin-bottom:4px; }
+  .card-cap{ font-size:12px; color:var(--grey); margin-bottom:10px; }
+  .chart-h{ height:280px; position:relative; margin-bottom:6px; }
+  .chart-h.tall{ height:320px; }
+  .chart-h.short{ height:220px; }
+  .chart-h svg{ display:block; }
 
-/* ===== Controls ===== */
-.controls{
-  display:flex; gap:8px; margin-bottom: 14px; flex-wrap: wrap;
-}
-.controls input, .controls select, select, input[type=text], input[type=number]{
-  font-family: var(--font-body);
-  font-size: 13px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  background: #fffdf7;
-  border-radius: var(--radius);
-  color: var(--ink);
-}
-.controls input#search{ flex: 1 1 160px; min-width: 140px; }
-.controls select{ flex: 0 0 auto; }
+  .chart-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; margin-bottom:18px; }
+  .chart-grid.even{ grid-template-columns:1fr 1fr; }
+  @media (max-width: 900px){
+    .chart-grid, .chart-grid.even{ grid-template-columns:1fr; }
+  }
 
-/* ===== Tag grid (inventory cards) ===== */
-.tag-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-.tag-card{
-  position: relative;
-  background: var(--paper-2);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  padding: 14px 14px 12px;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.tag-card:hover{ transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.18); }
-.tag-card.flash{ animation: flash 900ms ease; }
-@keyframes flash{
-  0%{ box-shadow: 0 0 0 2px var(--gold); }
-  100%{ box-shadow: none; }
-}
-.tag-hole{
-  position:absolute; top: -7px; left: 18px;
-  width: 14px; height: 14px;
-  background: var(--bg);
-  border-radius: 50%;
-  border: 3px solid var(--paper-2);
-}
-.tag-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-.tag-cat{
-  display:inline-block;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--cat-color, var(--gold));
-  padding: 2px 7px;
-  border-radius: 2px;
-  margin-bottom: 6px;
-}
-.tag-name{
-  font-family: var(--font-display);
-  font-size: 21px;
-  letter-spacing: .5px;
-  margin: 0 0 2px;
-  line-height:1.05;
-}
-.tag-actions{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.tag-edit{
-  background:none; border: 1px solid var(--ink-soft); color: var(--ink-soft);
-  font-size: 10px; text-transform: uppercase; letter-spacing: .5px; font-weight:700;
-  padding: 3px 8px; border-radius: 2px;
-}
-.tag-edit:hover{ background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.tag-remove{
-  background:none; border:none; color: var(--ink-soft); font-size:16px; padding:0 2px; cursor:pointer; border-radius:2px; line-height:1;
-}
-.tag-remove:hover{ color: var(--crimson); background:none; }
-.tag-remove.confirming{ color:#fff; background:var(--crimson); padding:2px 6px; font-size:11px; }
+  /* ---- tables ---- */
+  .tbl-scroll{ overflow-x:auto; }
+  th{ text-align:left; padding:8px 10px; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--grey); border-bottom:2px solid var(--ink); white-space:nowrap; }
+  th.r, td.r{ text-align:right; }
+  td{ padding:7px 10px; font-size:12.5px; border-bottom:1px solid #e6e6e6; white-space:nowrap; }
+  td.name{ white-space:normal; min-width:150px; }
+  .badge{ font-size:10px; padding:2px 9px; border-radius:10px; background:#e4f0b0; color:var(--olive-dark); font-weight:600; letter-spacing:.02em; }
+  .rank{ font-family:'Courier New',monospace; color:var(--olive-dark); }
 
-.tag-stock{
-  font-family: var(--font-mono);
-  font-size: 22px;
-  font-weight:700;
-  margin: 6px 0 2px;
-}
-.tag-stock small{ font-size:12px; font-weight:500; color: var(--ink-soft); }
+  .filter-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
+  .filter-row .flabel{ font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--grey); margin-right:2px; }
+  .filter-row .btnrow{ display:flex; flex-wrap:wrap; gap:8px; }
+  select.btn{
+    appearance:none; -webkit-appearance:none; padding-right:30px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M1 3 L5 7 L9 3' stroke='%235c8000' stroke-width='1.6' fill='none'/></svg>");
+    background-repeat:no-repeat; background-position:right 10px center;
+  }
+  select.btn:focus{ outline:2px solid var(--olive); outline-offset:1px; }
+  .filters-block{ margin-bottom:16px; }
 
-.gauge{
-  height: 7px; background: rgba(0,0,0,.08); border-radius: 4px; overflow:hidden; margin: 8px 0 6px;
-}
-.gauge-fill{
-  height:100%; border-radius:4px; width:0%;
-  background: var(--sage);
-  transition: width .6s cubic-bezier(.2,.8,.2,1);
-}
-.gauge-fill.watch{ background: var(--gold); }
-.gauge-fill.low{ background: var(--crimson); }
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--paper); border:1px solid var(--line);
+    border-radius:3px; padding:8px 12px; margin-bottom:12px; max-width:320px;
+  }
+  .search-box input{ all:unset; flex:1; font-size:13px; font-family:inherit; color:var(--ink); }
+  .search-box svg{ flex-shrink:0; opacity:.5; }
 
-.tag-foot{
-  display:flex; justify-content:space-between; font-size: 11px; color: var(--ink-soft);
-}
-.tag-status{ font-weight:700; letter-spacing:.3px; }
-.tag-status.low{ color: var(--crimson); }
-.tag-status.watch{ color: #8a6414; }
-.tag-status.ok{ color: var(--sage-deep); }
+  .subsection-label{ font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--olive-dark); margin:24px 0 10px; padding-top:14px; border-top:1px solid var(--line); }
+  .subsection-label:first-of-type{ border-top:none; padding-top:0; }
 
-/* ===== Movement panel ===== */
-.type-toggle{ display:flex; gap:8px; margin-bottom: 12px; }
-.type-toggle button{
-  flex:1; background: transparent; color: var(--ink); border: 1px solid var(--ink-soft);
-}
-.type-toggle button.active[data-type="in"]{ background: var(--sage); border-color: var(--sage); color:#fff; }
-.type-toggle button.active[data-type="out"]{ background: var(--crimson); border-color: var(--crimson); color:#fff; }
+  .heat-wrap{ overflow-x:auto; }
+  .heat-table{ border-collapse:separate; border-spacing:3px; font-family:'Courier New',monospace; font-size:10px; }
+  .heat-table th{ border:none; padding:2px 4px; font-size:9px; text-align:center; text-transform:none; letter-spacing:0; }
+  .heat-table td{ border:none; padding:0; white-space:nowrap; }
+  .heat-cell{ padding:6px 5px; border-radius:3px; text-align:center; min-width:34px; }
 
-.field{ margin-bottom: 10px; }
-.field label{ display:block; font-size: 11px; text-transform:uppercase; letter-spacing:1px; color: var(--ink-soft); margin-bottom:4px; font-weight:600;}
-.field select, .field input, .field textarea{ width: 100%; }
-.field textarea{ resize: vertical; min-height: 46px; font-family: var(--font-body); font-size:13px; padding:8px 10px; border:1px solid var(--line); border-radius: var(--radius); background:#fffdf7; }
-.qty-row{ display:flex; gap:8px; align-items:center; }
-.qty-row input{ flex:1; }
-.qty-unit{ font-family: var(--font-mono); font-size:13px; color: var(--ink-soft); min-width: 28px; }
-.form-error{ font-size:12px; color: var(--crimson); margin: -4px 0 10px; display:none; }
-.form-error.show{ display:block; }
-.submit-row{ margin-top: 4px; }
-.submit-row button{ width:100%; }
+  .foot{ text-align:center; font-size:11px; color:var(--grey-soft); margin-top:34px; }
 
-/* ===== Activity ticket log ===== */
-.ticket-log{ max-height: 360px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px;}
-.ticket{
-  border: 1px dashed var(--line);
-  border-radius: 2px;
-  padding: 9px 10px;
-  background: #fffdf7;
-  display:flex; align-items:center; gap:10px;
-  font-size: 12.5px;
-}
-.stamp{
-  flex-shrink:0;
-  width:34px; height:34px; border-radius:50%;
-  border: 2px solid var(--sage);
-  color: var(--sage);
-  display:flex; align-items:center; justify-content:center;
-  font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing:.5px;
-  transform: rotate(-8deg);
-  text-align:center;
-  line-height:1;
-}
-.stamp.out{ border-color: var(--crimson); color: var(--crimson); transform: rotate(7deg); }
-.ticket-body{ flex:1; min-width:0; }
-.ticket-title{ font-weight:700; }
-.ticket-meta{ color: var(--ink-soft); font-size:11px; }
-.ticket-qty{ font-family: var(--font-mono); font-weight:700; white-space:nowrap; }
-.ticket-qty.in{ color: var(--sage-deep); }
-.ticket-qty.out{ color: var(--crimson-deep); }
-.empty-note{ color: var(--ink-soft); font-size: 12.5px; padding: 6px 2px; }
+  #chart-tooltip{
+    position:fixed; pointer-events:none; z-index:999; background:#ffffff; border:1px solid var(--line);
+    border-radius:3px; padding:7px 10px; font-size:11.5px; font-family:'Georgia',serif; color:var(--ink);
+    box-shadow:0 2px 8px rgba(0,0,0,.12); display:none; max-width:220px; line-height:1.5;
+  }
+  #chart-tooltip .tt-title{ font-weight:700; margin-bottom:2px; }
+  #chart-tooltip .tt-row{ display:flex; align-items:center; gap:6px; }
+  #chart-tooltip .tt-swatch{ width:8px; height:8px; border-radius:2px; flex-shrink:0; }
 
-/* ===== Sheet sync panel ===== */
-.log-actions{ display:flex; gap:6px; }
-.log-actions button{ font-size:11px; padding:6px 9px; }
-.sync-panel{
-  display:none;
-  border: 1px dashed var(--line);
-  border-radius: 3px;
-  padding: 12px;
-  margin-bottom: 12px;
-  background: #fffdf7;
-}
-.sync-panel.show{ display:block; }
-.sync-panel p{ font-size:12px; color: var(--ink-soft); margin: 0 0 8px; line-height:1.5; }
-.sync-panel .field{ margin-bottom: 8px; }
-.sync-status{ font-size:11px; margin-top:6px; font-weight:600; }
-.sync-status.on{ color: var(--sage-deep); }
-.sync-status.off{ color: var(--ink-soft); }
-.sync-code{
-  width:100%; font-family: var(--font-mono); font-size:10.5px; line-height:1.5;
-  min-height: 130px; background: var(--ink); color: #e8dcc0; border-radius:3px; border:none; padding:10px;
-  resize: vertical;
-}
-.sync-actions{ display:flex; gap:6px; margin-top:8px; }
-.sync-actions button{ flex:1; font-size:11px; padding:7px; }
-
-/* ===== Chart panel ===== */
-.chart-rows{ display:flex; flex-direction:column; gap:10px; }
-.chart-panel{ margin-bottom: 18px; }
-.chart-row{ display:grid; grid-template-columns: 130px 1fr 70px; align-items:center; gap:10px; }
-.chart-row .name{ font-size:13px; font-weight:600; }
-.chart-track{ height: 14px; background: rgba(0,0,0,.06); border-radius:3px; overflow:hidden; }
-.chart-bar{ height:100%; width:0%; border-radius:3px; transition: width .8s cubic-bezier(.2,.8,.2,1); }
-.chart-row .val{ font-family: var(--font-mono); font-size:12px; text-align:right; }
-
-/* ===== Modal ===== */
-.modal-overlay{
-  position: fixed; inset:0; background: rgba(15,12,8,.6);
-  display:none; align-items:center; justify-content:center; z-index: 50; padding: 16px;
-}
-.modal-overlay.show{ display:flex; }
-.modal{
-  background: var(--paper); border-radius: 4px; padding: 22px 24px; width: 100%; max-width: 420px;
-  box-shadow: var(--shadow); border: 1px solid var(--line);
-}
-.modal h2{ font-family: var(--font-display); font-size:24px; letter-spacing:1px; margin:0 0 14px; }
-.modal-actions{ display:flex; gap:8px; margin-top: 6px; }
-.modal-actions button{ flex:1; }
-
-/* ===== Toast stamp overlay ===== */
-#stampLayer{ position: fixed; top: 18px; right: 18px; display:flex; flex-direction:column; gap:8px; z-index: 60; pointer-events:none; }
-.toast{
-  font-family: var(--font-mono);
-  background: var(--ink); color: var(--paper);
-  padding: 10px 14px; border-radius: 3px; font-size: 12.5px;
-  box-shadow: var(--shadow);
-  border-left: 4px solid var(--sage);
-  animation: toastIn .35s ease, toastOut .4s ease 2.2s forwards;
-}
-.toast.out{ border-left-color: var(--crimson); }
-@keyframes toastIn{ from{ opacity:0; transform: translateX(20px) rotate(-2deg);} to{ opacity:1; transform: translateX(0) rotate(0);} }
-@keyframes toastOut{ to{ opacity:0; transform: translateX(20px);} }
-
-/* ===== Responsive ===== */
-@media (max-width: 980px){
-  .grid-main{ grid-template-columns: 1fr; }
-  .stats{ grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 640px){
-  body{ padding: 14px 10px 40px; }
-  .brand h1{ font-size: 21px; }
-  .tag-grid{ grid-template-columns: 1fr; }
-  .board-inner{ flex-direction:column; align-items:flex-start; }
-  .board-meta{ text-align:left; }
-  .chart-row{ grid-template-columns: 90px 1fr 56px; }
-  .stats{ grid-template-columns: repeat(2, 1fr); }
-}
-::-webkit-scrollbar{ width:8px; }
-::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
+  @media (max-width: 640px){
+    .hdr h1{ font-size:20px; }
+    .kpi .val{ font-size:18px; }
+    .card-pad{ padding:15px 15px 6px; }
+    .wrap{ padding:16px 14px 50px; }
+    .chart-h, .chart-h.tall{ height:240px; }
+    .tier{ scroll-margin-top:56px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <header class="board">
-    <div class="board-inner">
-      <div class="brand">
-        <div>
-          <h1>M. Montesclaros Farms, Inc.</h1>
-          <p>Sales Meat and Livestock — Meat Cutting Plant</p>
-          <p class="brand-sub">Cold Storage Inventory and Movement Log</p>
-        </div>
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="eyebrow">M. Montesclaros Farms Inc. — Sayre Highway, Hagkol</div>
+    <h1>Year-over-Year Sales Analysis</h1>
+    <div class="sub" id="hdr-sub">Overview &middot; Main Products &middot; MCP &amp; By-Products &middot; Customers</div>
+  </div>
+</header>
+
+<div class="qnav-wrap">
+  <nav class="qnav">
+    <a class="btn" href="#t1">1. Overview</a>
+    <a class="btn" href="#t2">2. Main Products</a>
+    <a class="btn" href="#t3">3. MCP &amp; By-Products</a>
+    <a class="btn" href="#t4">4. Customers</a>
+  </nav>
+</div>
+
+<div class="wrap">
+
+  <!-- TIER 1 -->
+  <section class="tier" id="t1">
+    <div class="section-title">1. Overall Summary</div>
+    <div class="section-sub">Total revenue across every product line, company-wide</div>
+
+    <div class="filters-block">
+      <div class="filter-row">
+        <span class="flabel">Year:</span>
+        <div class="btnrow" id="t1-year-pills"></div>
       </div>
-      <div class="board-meta">
-        <div id="clock">—</div>
-        <div class="sub">Sayre Highway, Valencia City</div>
+      <div class="filter-row">
+        <span class="flabel">Product:</span>
+        <div class="btnrow" id="t1-product-pills"></div>
       </div>
     </div>
-  </header>
 
-  <section class="stats" id="stats"></section>
+    <div class="kpi-grid" id="p1-kpis"></div>
 
-  <section class="panel chart-panel">
-    <h2>Stock by category</h2>
-    <div class="chart-rows" id="categoryChart"></div>
+    <div class="chart-grid even">
+      <div class="card card-pad">
+        <div class="card-title" id="t1-chart1-title">Total sales by year</div>
+        <div class="card-cap" id="t1-chart1-cap">Stacked by product line, in PHP</div>
+        <div class="chart-h tall" id="chart-overall-stack"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title" id="t1-chart2-title">Year‑over‑year growth</div>
+        <div class="card-cap" id="t1-chart2-cap">% change in total sales value</div>
+        <div class="chart-h tall" id="chart-yoy-growth"></div>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="card-title">Yearly summary table</div>
+      <div class="card-cap">Quantity and sales value per product line</div>
+      <div class="tbl-scroll"><table id="p1-table"></table></div>
+    </div>
   </section>
 
-  <main class="grid-main">
-    <section class="panel inventory-panel">
-      <div class="panel-head">
-        <h2>Inventory</h2>
-        <button id="openAddItem">+ New cut</button>
-      </div>
-      <div class="controls">
-        <input id="search" type="text" placeholder="Search cuts…">
-        <select id="categoryFilter">
-          <option value="all">All categories</option>
-          <option value="pork">Pork</option>
-          <option value="beef">Beef</option>
-          <option value="chicken">Chicken</option>
-          <option value="lamb">Lamb</option>
-        </select>
-        <select id="sortBy">
-          <option value="name">Sort: Name</option>
-          <option value="stockLow">Sort: Lowest stock</option>
-          <option value="stockHigh">Sort: Highest stock</option>
-        </select>
-      </div>
-      <div class="tag-grid" id="tagGrid"></div>
-    </section>
+  <!-- TIER 2 -->
+  <section class="tier" id="t2">
+    <div class="section-title">2. Main Products</div>
+    <div class="section-sub">Live Market Hogs, Live Cattle, and Hatching Eggs A — the company's core revenue lines</div>
 
-    <aside class="side-col">
-      <section class="panel movement-panel" style="margin-bottom:18px;">
-        <h2>Record movement</h2>
-        <form id="movementForm">
-          <div class="type-toggle">
-            <button type="button" class="active" data-type="in">↓ Stock In</button>
-            <button type="button" data-type="out">↑ Stock Out</button>
-          </div>
-          <div class="field">
-            <label for="moveItem">Cut <span style="color:var(--crimson)">*</span></label>
-            <select id="moveItem"></select>
-          </div>
-          <div class="field">
-            <label for="moveRef">Reference # <span style="color:var(--crimson)">*</span></label>
-            <input id="moveRef" type="text" placeholder="e.g. PO-1042, INV-338, ticket #12" required>
-          </div>
-          <div class="field">
-            <label for="moveQty">Quantity <span style="color:var(--crimson)">*</span></label>
-            <div class="qty-row">
-              <input id="moveQty" type="number" min="0.1" step="0.1" placeholder="0.0">
-              <span class="qty-unit" id="moveUnit">kg</span>
-            </div>
-          </div>
-          <div class="field">
-            <label for="moveReason">Reason <span style="color:var(--crimson)">*</span></label>
-            <select id="moveReason"></select>
-          </div>
-          <div class="field">
-            <label for="moveBatch">Batch Code / Production Date <span style="color:var(--crimson)">*</span></label>
-            <input id="moveBatch" type="text" placeholder="e.g. BC-0731 or 2026-07-31" required>
-          </div>
-          <div class="field">
-            <label for="moveStockman">Stockman In-charge <span style="color:var(--crimson)">*</span></label>
-            <input id="moveStockman" type="text" placeholder="Full name" required>
-          </div>
-          <div class="field">
-            <label for="moveNote">Note (optional)</label>
-            <textarea id="moveNote" placeholder="e.g. supplier, order #, ticket ref…"></textarea>
-          </div>
-          <div class="form-error" id="moveError">Enter a valid quantity.</div>
-          <div class="submit-row">
-            <button type="submit">Stamp entry</button>
-          </div>
-        </form>
-      </section>
+    <div class="filters-block">
+      <div class="filter-row">
+        <span class="flabel">Product:</span>
+        <div class="btnrow" id="p2-pills"></div>
+      </div>
+      <div class="filter-row">
+        <span class="flabel">Focus Year:</span>
+        <div class="btnrow" id="p2-year-pills"></div>
+      </div>
+    </div>
 
-      <section class="panel log-panel">
-        <div class="panel-head">
-          <h2>Activity</h2>
-          <div class="log-actions">
-            <button type="button" class="ghost" id="exportCsv">Export CSV</button>
-          </div>
-        </div>
-        <div class="sync-status off" id="syncStatus">Auto-syncing every movement to your Google Sheet.</div>
-        <div class="ticket-log" id="ticketLog"></div>
-      </section>
-    </aside>
-  </main>
+    <div class="kpi-grid" id="p2-kpis"></div>
+
+    <div class="chart-grid even">
+      <div class="card card-pad">
+        <div class="card-title" id="p2-chart1-title">Monthly volume by year</div>
+        <div class="card-cap" id="p2-chart1-cap">Overlaid across years to compare seasonality</div>
+        <div class="chart-h tall" id="chart-product-monthly"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title">Annual sales value</div>
+        <div class="card-cap">Total PHP per year</div>
+        <div class="chart-h tall" id="chart-product-annual"></div>
+      </div>
+    </div>
+
+    <div class="chart-grid even">
+      <div class="card card-pad">
+        <div class="card-title">Average unit rate</div>
+        <div class="card-cap" id="p2-rate-cap">PHP per unit, by year</div>
+        <div class="chart-h tall" id="chart-product-rate"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title">Seasonality heatmap</div>
+        <div class="card-cap">Monthly volume intensity by year</div>
+        <div class="heat-wrap" id="p2-heatmap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier" id="t3">
+    <div class="section-title">3. MCP &amp; By-Products</div>
+    <div class="section-sub">Meat-cut processing, swine and poultry by-products, partner-farm volumes, and miscellaneous sales lines (2020–2023)</div>
+
+    <div class="filters-block">
+      <div class="filter-row">
+        <span class="flabel">Year:</span>
+        <div class="btnrow" id="p3-year-pills"></div>
+      </div>
+      <div class="filter-row">
+        <span class="flabel">Category:</span>
+        <div class="btnrow" id="p3-cat-pills"></div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="p3-kpis"></div>
+
+    <div class="chart-grid even">
+      <div class="card card-pad">
+        <div class="card-title" id="p3-chart1-title">Sales by category</div>
+        <div class="card-cap" id="p3-chart1-cap">Total PHP per year, by group</div>
+        <div class="chart-h tall" id="chart-mcp-groups"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title" id="p3-chart2-title">Top contributing line items</div>
+        <div class="card-cap" id="p3-chart2-cap">Ranked by total 2020–2023 sales value</div>
+        <div class="chart-h tall" id="chart-mcp-top"></div>
+      </div>
+    </div>
+
+    <div id="p3-groups"></div>
+  </section>
+
+  <!-- TIER 4 -->
+  <section class="tier" id="t4">
+    <div class="section-title">4. Customers</div>
+    <div class="section-sub">Account-level performance from the YOY Sales-Customers ledger — concentration, growth, and product mix per buyer</div>
+
+    <div class="filters-block">
+      <div class="filter-row">
+        <span class="flabel">Year:</span>
+        <div class="btnrow" id="p4-year-pills"></div>
+      </div>
+      <div class="filter-row">
+        <span class="flabel">Product:</span>
+        <select class="btn" id="p4-product-select"></select>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="p4-kpis"></div>
+
+    <div class="chart-grid even">
+      <div class="card card-pad">
+        <div class="card-title" id="p4-chart1-title">Top 12 customers</div>
+        <div class="card-cap" id="p4-chart1-cap">By total sales value, all years</div>
+        <div class="chart-h tall" id="chart-cust-top"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title" id="p4-chart2-title">Top products across customers</div>
+        <div class="card-cap" id="p4-chart2-cap">By total sales value, all years</div>
+        <div class="chart-h tall" id="chart-cust-products"></div>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="card-title">All customers</div>
+      <div class="card-cap">Search, and browse per‑year sales &amp; top product</div>
+      <div class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="cust-search" placeholder="Search customer name…">
+      </div>
+      <div class="tbl-scroll"><table id="p4-table"></table></div>
+    </div>
+  </section>
+
+  <div class="foot">Source: UPGRADED YOY / YOY SALES‑CUSTOMERS workbook — M. Montesclaros Farms Inc.</div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h2 id="modalTitle">Add new cut</h2>
-    <form id="addItemForm">
-      <input type="hidden" id="editItemId" value="">
-      <div class="field">
-        <label for="newName">Name</label>
-        <input id="newName" type="text" placeholder="e.g. Flank Steak" required>
-      </div>
-      <div class="field">
-        <label for="newCategory">Category</label>
-        <select id="newCategory">
-          <option value="pork">Pork</option>
-          <option value="beef">Beef</option>
-          <option value="chicken">Chicken</option>
-          <option value="lamb">Lamb</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="newUnit">Unit</label>
-        <select id="newUnit">
-          <option value="kg">Kilograms (kg)</option>
-          <option value="lb">Pounds (lb)</option>
-          <option value="pcs">Pieces (pcs)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="newStock" id="newStockLabel">Starting stock</label>
-        <input id="newStock" type="number" min="0" step="0.1" value="0">
-      </div>
-      <div class="field">
-        <label for="newReorder">Reorder level</label>
-        <input id="newReorder" type="number" min="0" step="0.1" value="5">
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="ghost" id="cancelAddItem">Cancel</button>
-        <button type="submit" id="modalSubmitBtn">Add cut</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="chart-tooltip"></div>
 
-<div class="modal-overlay" id="pinOverlay">
-  <div class="modal" style="max-width:320px;">
-    <h2>🔒 Manager PIN</h2>
-    <p style="font-size:12px; color:var(--ink-soft); margin:-8px 0 14px; line-height:1.5;">Editing or deleting a cut requires the manager PIN.</p>
-    <form id="pinForm">
-      <div class="field">
-        <label for="pinInput">PIN</label>
-        <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
-      </div>
-      <div class="form-error" id="pinError">Incorrect PIN — try again.</div>
-      <div class="modal-actions">
-        <button type="button" class="ghost" id="pinCancel">Cancel</button>
-        <button type="submit" id="pinSubmitBtn">Unlock</button>
-      </div>
-    </form>
-  </div>
-</div>
+<script id="dashboard-data" type="application/json">{"months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "overall": {"years": [2020, 2021, 2022, 2023, 2024, 2025], "live_peso": [86606441.25, 296802025.4, 468719091.4, 548707720.2, 462847640.6, 464634067.4], "eggs_peso": [285169483.17, 113635577.42, 520453649.66, 703067559.3, 764853680.65, 1164984973.7], "cattle_peso": [0, 0, 6164787.93, 8745690, 8807260, 2484050], "total_peso": [371775924.42, 410437602.82, 995337528.99, 1260520969.5, 1236508581.25, 1632103091.1], "live_heads": [6867, 18656, 28209, 30795, 24563, 23949], "eggs_pcs": [17889428, 6683716, 27811659, 37129931, 38566497, 46505012], "cattle_heads": [0, 0, 129, 153, 103, 26], "live_kilos": [746720.3, 1956361.6, 2858689.8, 3165482.0, 2591425.6, 2509373.2], "cattle_kilos": [0, 0, 61930.4, 70523.5, 39446, 9303], "yoy_growth": [null, 10.4, 142.5, 26.6, -1.9, 32.0]}, "products": {"live": {"label": "Live Market Hogs", "unit": "Heads", "heads": {"2020": [0, 0, 0, 0, 0, 0, 451, 1250, 1681, 1537, 474, 1474], "2021": [1550, 1154, 1278, 412, 969, 1437, 1956, 1433, 1198, 2489, 2293, 2487], "2022": [2319, 1680, 1981, 1673, 1823, 2603, 1929, 2124, 3732, 2024, 2394, 3927], "2023": [2234, 1729, 2752, 2246, 1851, 1985, 3255, 3759, 2929, 2130, 2991, 2934], "2024": [1329, 2702, 2456, 1702, 1890, 1581, 1720, 1727, 1177, 3130, 2013, 3136], "2025": [2087, 1905, 1981, 3232, 2280, 1941, 1378, 471, 2397, 905, 2510, 2862]}, "kilos": {"2020": [0, 0, 0, 0, 0, 0, 47130.6, 136702.49, 190071.4, 169268.4, 53695.8, 149851.6], "2021": [152538, 122746.6, 131201.2, 42388.4, 108003.2, 153533.2, 205494, 159026.6, 134770.4, 259945.4, 240884.4, 245830.2], "2022": [228159, 170576.6, 198321.2, 169149.2, 187563.4, 279112.4, 202897.4, 230084.4, 378690.6, 190490.6, 239353.8, 384291.2], "2023": [221600.8, 173746, 284356.6, 233644.3, 198877.2, 216275.6, 361003.7, 379291.2, 292632, 223766.8, 306402.6, 273885.2], "2024": [131327.4, 288335.8, 255168.6, 169982, 184511.8, 165204, 192725.8, 189671.2, 135821, 340196.2, 215132.4, 323349.4], "2025": [212360.8, 202193.6, 212697.6, 335214.2, 223146.6, 184525.2, 138253.2, 54771.4, 282300.8, 102560.6, 272724.4, 288624.8]}, "peso": {"2020": [0, 0, 0, 0, 0, 0, 4797376, 14409824.65, 20291656.8, 19243422.6, 7056987, 20807174.2], "2021": [25101903.2, 20061029.4, 21690927.4, 7337087.8, 17986194, 24450123.8, 33384281.6, 22105459.2, 16500071, 32022363.4, 35935061.8, 40227522.8], "2022": [37533703.4, 28281575, 34225081.6, 30319044.4, 33445387, 49186985.4, 34232929.4, 33542260.2, 52841077.6, 28868187.8, 39317412.4, 66925447.2], "2023": [41429527.6, 32751925.6, 54077778.2, 45283448.5, 37201415.6, 35687276, 55443447.5, 56760226, 45549861.4, 39253398, 55283748.6, 49985667.2], "2024": [24275373, 53717725.8, 48938607, 32616879, 35318851, 30968782.2, 34400751.4, 30903618.4, 20376390, 53169830.8, 37296429.6, 60864402.4], "2025": [42368095, 42974330, 46300413.6, 67463970.8, 45497777.8, 38751177, 28413558.2, 9503693, 43040640.2, 15367069.2, 40897263, 44056079.6]}, "rate": {"2020": [0, 0, 0, 0, 0, 0, 101.78898634857184, 105.41011103748002, 106.75807512334839, 113.68585394556811, 131.42530700725194, 138.85186544554745], "2021": [164.56163841141225, 163.4345016481108, 165.32567842367294, 173.0918789102679, 166.53389899558533, 159.24975054255364, 162.45866837961208, 139.0047903935568, 122.43097148928845, 123.1888058030648, 149.17969698328326, 163.63946659116738], "2022": [164.50678430392838, 165.79985179678806, 172.57399410653022, 179.24438543014094, 178.3151030531543, 176.22644282375128, 168.72039464280962, 145.78241810396534, 139.5362800132879, 151.54652145565188, 164.26483473418847, 174.15295276082304], "2023": [186.9556770553175, 188.5046308979775, 190.1759206573718, 193.813623957443, 187.0572172174588, 165.00833196162674, 153.58138296089484, 149.64814896839155, 155.65577722190326, 175.42100972977227, 180.4284578525117, 182.50590831487062], "2024": [184.84621640266997, 186.30265752639804, 191.78929931033835, 191.8843112800179, 191.4178442787941, 187.45782305513183, 178.49582878888037, 162.93258227922846, 150.023854926705, 156.29166580931826, 173.36500499227455, 188.23106645628536], "2025": [199.50996134879884, 212.54050573311915, 217.68188075464886, 201.25630358141152, 203.8918710838525, 210.00479609289135, 205.51826793159216, 173.51561216255197, 152.46375568188262, 149.8340415325183, 149.95821055981787, 152.64135167871925], "2026": [152.52, 146.39, 148.42, 171.29, 0, 0, 0, 0, 0, 0, 0, 0]}}, "eggs": {"label": "Hatching Eggs - Class A", "unit": "Pieces", "pcs": {"2020": [669635, 2059587, 2443184, 2083592, 2408830, 1999454, 1951267, 1771790, 1343585, 1069259, 89245, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 450148, 1584511, 2323901, 2325156], "2022": [2634245, 2114187, 2862473, 2786432, 3145838, 2773683, 2570849, 1943735, 1636920, 1910862, 2022686, 1409749], "2023": [1083706, 1040461, 1002115, 1568393, 3266104, 3038457, 3600312, 4206645, 4423496, 5083558, 4210104, 4606580], "2024": [4909896, 4487643, 3932628, 3535057, 3264318, 3321699, 3117028, 2236646, 2293997, 2405966, 2342907, 2718712], "2025": [3349459, 3013336, 3685380, 4319325, 4736535, 5220363, 4856925, 4008829, 3522947, 3537321, 3630678, 2623914]}, "peso": {"2020": [10714160, 33112180.5, 39154944, 33305472, 38495680, 31870064, 31151872, 28318240, 21275360, 17108144, 663366.6666662666, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 6804445, 25779600, 40201825.92, 40849706.5], "2022": [46451752.5, 36752143, 51095356.5, 50798272, 57036920, 51241413.5, 48255827, 38224155.5, 34013267, 37566519.5, 40400436.5, 28617586.66], "2023": [21597353.2, 20693070.5, 19793153, 28748862.5, 59782432.5, 59072659.5, 70024155, 82237687.75, 83009818.5, 96443309.15, 79843376.5, 81821681.2], "2024": [84403778.5, 76479371, 69649117.75, 65717512, 61064532, 66278551.25, 67307063.5, 46873700.2, 50457212.3, 56590027.7, 55146607.65, 64886206.8], "2025": [82930722.4, 76114583.5, 96540918.5, 114355522.5, 121817454.2, 130138235.8, 120452093.85, 99417682.55, 86445698.25, 85137814.15, 88107840.75, 63526407.25]}, "rate": {"2020": [16, 16.077097252992953, 16.026195325444174, 15.984641906860844, 15.981069647920359, 15.939383451682309, 15.964945853130299, 15.982842210419971, 15.834770409017665, 16, 7.433096158510467, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 15.116017398722198, 16.2697513617766, 17.299285090027503, 17.56858744101471], "2022": [17.63380114605893, 17.383581963184902, 17.85007456838894, 18.230580182828792, 18.130914560762506, 18.474141962149243, 18.770385580794517, 19.665312143887927, 20.778820589888326, 19.659462326426503, 19.973657057991204, 20.299774399556235], "2023": [19.929162706490505, 19.88836727181509, 19.751378833766584, 18.330139512226847, 18.303897395796337, 19.44166381159911, 19.449468546059343, 19.549471788087658, 18.76565922067071, 18.971615775801123, 18.96470407856908, 17.761914739351102], "2024": [17.19054303797881, 17.04221369658861, 17.710578714793265, 18.590226975123738, 18.706673798324797, 19.953208057081632, 21.593345808892316, 20.957138590550315, 21.995326192667207, 23.52070964427594, 23.537685298648217, 23.86652458958507], "2025": [24.75943798685101, 25.25924208252913, 26.195648345625145, 26.475322533034674, 25.718685537001207, 24.92896294759579, 24.800072854738335, 24.799681540419908, 24.537893488037145, 24.068444495141947, 24.267599811935952, 24.21055234660892]}}, "cattle": {"label": "Live Cattle", "unit": "Heads", "heads": {"2020": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2022": [11, 5, 18, 5, 19, 18, 12, 9, 8, 0, 9, 15], "2023": [27, 15, 2, 0, 2, 20, 22, 25, 5, 35, 0, 0], "2024": [8, 5, 14, 14, 12, 17, 5, 0, 7, 5, 11, 5], "2025": [11, 8, 0, 0, 4, 0, 0, 0, 0, 1, 0, 2]}, "kilos": {"2020": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2022": [4734, 3062, 9050.93, 2242, 9344.93, 8096, 4803.57, 4275, 4646, 0, 4434, 7242], "2023": [12562, 7514, 926, 0, 474, 9822, 11494, 11674, 3164, 12893.5, 0, 0], "2024": [5064, 2536, 6058, 7621, 7145, 8886, 2136, 0, 0, 0, 0, 0], "2025": [5971, 3332, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "peso": {"2020": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2022": [449730, 290890, 901418.35, 212990, 887768.35, 769120, 726338.68, 375942.55, 441370, 0, 421230, 687990], "2023": [1193390, 713830, 87970, 0, 75030, 933090, 1091930, 1109030, 300580, 3240840, 0, 0], "2024": [658320, 329680, 1160330, 1198620, 1178910, 1392400, 300000, 0, 680000, 350000, 1228000, 331000], "2025": [913120, 709930, 0, 0, 640000, 0, 0, 0, 0, 190000, 0, 31000]}, "rate": {"2020": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2021": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2022": [95, 95, 99.59400304720067, 95, 95, 95, 151.20809731095832, 87.93977777777778, 95, 0, 95, 95], "2023": [95, 95, 95, 0, 158.29113924050634, 95, 95, 95, 95, 251.3545584984682, 0, 0], "2024": [130, 130, 191.53681082865631, 157.27857236583125, 164.99790062981106, 156.6959261760072, 140.4494382022472, 0, 0, 0, 0, 0], "2025": [152.9258080723497, 213.06422569027612, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}}, "mcp_others": {"MCP": [{"name": "PORK CARCASS & CUTS (KILO)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 55274.72, "amt_2023": 12021045.93}, {"name": "BEEF CARCASS & CUTS (KILO)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 2138, "amt_2023": 275659}], "SWINE - byProducts": [{"name": "CULLED BOAR", "qty_2020": 0, "amt_2020": 0, "qty_2021": 106, "amt_2021": 1198395, "qty_2022": 216, "amt_2022": 2317706.4, "qty_2023": 391, "amt_2023": 5638196.4}, {"name": "CULLED SOW", "qty_2020": 38, "amt_2020": 490083.8, "qty_2021": 357, "amt_2021": 5869780.6, "qty_2022": 244, "amt_2022": 4937611, "qty_2023": 652, "amt_2023": 14442260.6}, {"name": "CULLED GILTS", "qty_2020": 31, "amt_2020": 422405, "qty_2021": 63, "amt_2021": 1205219, "qty_2022": 692, "amt_2022": 13801753.2, "qty_2023": 127, "amt_2023": 2979885}], "PARTNER FARMS": [{"name": "PF-TYCG LIVE MARKET HOGS (IN HDS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 617, "amt_2021": 10230788, "qty_2022": 800, "amt_2022": 14787523, "qty_2023": 0, "amt_2023": 0}, {"name": "PF-COCHINO LIVE MARKET HOGS (IN HDS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 487, "amt_2022": 7930823.3, "qty_2023": 409, "amt_2023": 7916024}], "POULTRY - byProducts": [{"name": "HATCHING EGGS B (PCS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 646169, "amt_2021": 5802651.5, "qty_2022": 1232427, "amt_2022": 11199020.08, "qty_2023": 261690, "amt_2023": 2505694}, {"name": "HATCHING EGGS - DOWNGRADED TO TE (PCS)", "qty_2020": 138656, "amt_2020": 689833.94, "qty_2021": 14370, "amt_2021": 52690, "qty_2022": 0, "amt_2022": 0, "qty_2023": 3353937, "amt_2023": 11849057.93}, {"name": "TABLE EGGS (PCS)", "qty_2020": 417343, "amt_2020": 1987100.86, "qty_2021": 448519, "amt_2021": 1501577.24, "qty_2022": 1962338, "amt_2022": 6928027.83, "qty_2023": 5662420, "amt_2023": 21424847.3}, {"name": "CULLED CHICKEN (HEADS)", "qty_2020": 88356, "amt_2020": 21131268.5, "qty_2021": 3496, "amt_2021": 490255, "qty_2022": 160164, "amt_2022": 41911370, "qty_2023": 142664, "amt_2023": 37244935}, {"name": "DAVAO/GEN SAN DAY OLD CHICK A", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 1164930, "amt_2023": 30447689.5}, {"name": "DAVAO DAY OLD CHICKS B", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 18494, "amt_2023": 243825}, {"name": "DAVAO DAY OLD CHICKS REJECT", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 6754, "amt_2023": 30398}, {"name": "DAVAO DAY OLD CHICKS BY PRODUCTS", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 388188, "amt_2023": 774199.5}, {"name": "MM3 DAY OLD CHICK BY PRODUCTS (PCS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 23077, "amt_2022": 22493.53, "qty_2023": 7871, "amt_2023": 12394.5}, {"name": "SASSO HATCHING EGGS (PCS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 200, "amt_2022": 6000, "qty_2023": 0, "amt_2023": 0}, {"name": "SASSO DAY OLD CHICKS", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 11152, "amt_2022": 498735, "qty_2023": 2558, "amt_2023": 105790}, {"name": "SASSO LIVE (HEADS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 27281, "amt_2022": 6445747.02, "qty_2023": 12785, "amt_2023": 2998162.5}, {"name": "SASSO DRESSED CHICKEN (IN HEADS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 3356, "amt_2022": 801166.45, "qty_2023": 912, "amt_2023": 242869.76}, {"name": "SASSO DRESSED CHICKEN BY PRODUCT (IN KILOS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 628, "amt_2022": 51522.26, "qty_2023": 0, "amt_2023": 0}, {"name": "TETRA DAY OLD CHICKS", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "TETRA DAY OLD CHICKS BY PRODUCT", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "TETRA LIVE GROW OUT", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "TETRA DRESSED CHICKEN", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "PULP TRAYS (PCS)", "qty_2020": 0, "amt_2020": 2355, "qty_2021": 113398, "amt_2021": 396893, "qty_2022": 922814, "amt_2022": 4346293.06, "qty_2023": 1172246, "amt_2023": 4452537.13}, {"name": "EGG BOXES (PCS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 4363, "amt_2022": 314136, "qty_2023": 11410, "amt_2023": 982260}, {"name": "CHICKEN DUNG (BAGS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}], "OTHERS": [{"name": "CARNERO (HEADS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 3, "amt_2021": 10500, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "HORSE (HEADS)", "qty_2020": 0, "amt_2020": 0, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 0}, {"name": "DELIVERY FEE", "qty_2020": 0, "amt_2020": 1500, "qty_2021": 0, "amt_2021": 0, "qty_2022": 0, "amt_2022": 0, "qty_2023": 0, "amt_2023": 1780000}]}, "customers": [{"name": "CHICKEN ESSENTIALS PHIL. INC", "total": 830323604.69, "by_year": {"2020": 0.0, "2021": 32852940.92, "2022": 385113635.49, "2023": 412357028.28, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 32599698.42, "2022": 380914759.5, "2023": 405464868.85, "2024": 0.0}, "total": 818979326.77}, {"product": "PULP TRAYS", "by_year": {"2020": 0.0, "2021": 253242.5, "2022": 3887187.99, "2023": 3561888.43, "2024": 0.0}, "total": 7702318.92}, {"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2716840.0, "2024": 0.0}, "total": 2716840.0}, {"product": "EGG BOXES", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 311688.0, "2023": 613431.0, "2024": 0.0}, "total": 925119.0}], "top_products": [["HATCHING EGGS A", 818979326.77], ["PULP TRAYS", 7702318.92], ["DAVAO DOC A", 2716840.0]]}, {"name": "VROSS CORPORATION", "total": 801443518.85, "by_year": {"2020": 41470429.85, "2021": 127888578.4, "2022": 271954759.4, "2023": 360129751.2, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 41470429.85, "2021": 121377318.4, "2022": 269949919.8, "2023": 360051251.2, "2024": 0.0}, "total": 792848919.25}, {"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 6511260.0, "2022": 1732243.0, "2023": 0.0, "2024": 0.0}, "total": 8243503.0}, {"product": "SASSO DRESSED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 272596.6, "2023": 0.0, "2024": 0.0}, "total": 272596.6}, {"product": "DELIVERY FEE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 64000.0, "2024": 0.0}, "total": 64000.0}, {"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 14500.0, "2024": 0.0}, "total": 14500.0}], "top_products": [["MARKET HOGS", 792848919.25], ["PF-MARKET HOGS", 8243503.0], ["SASSO DRESSED CHICKEN", 272596.6]]}, {"name": "LUCHAY LIMLAO", "total": 547938569.2, "by_year": {"2020": 30816486.8, "2021": 158015424.0, "2022": 191473197.0, "2023": 167633461.4, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 30816486.8, "2021": 156745959.0, "2022": 191473197.0, "2023": 166892162.4, "2024": 0.0}, "total": 545927805.2}, {"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 1269465.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 1269465.0}, {"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 741299.0, "2024": 0.0}, "total": 741299.0}], "top_products": [["MARKET HOGS", 545927805.2], ["PF-MARKET HOGS", 1269465.0], ["DAVAO DOC A", 741299.0]]}, {"name": "C-JOY POULTRY MEATS INC.", "total": 538756831.0, "by_year": {"2020": 275573632.0, "2021": 57006148.0, "2022": 90510405.5, "2023": 115666645.5, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 275573632.0, "2021": 57006148.0, "2022": 90510405.5, "2023": 115666645.5, "2024": 0.0}, "total": 538756831.0}], "top_products": [["HATCHING EGGS A", 538756831.0]]}, {"name": "APD FOODS INC. (BODAN)", "total": 97024868.93, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 97024868.93, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 94140410.25, "2024": 0.0}, "total": 94140410.25}, {"product": "DELIVERY FEE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1716000.0, "2024": 0.0}, "total": 1716000.0}, {"product": "PULP TRAYS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 799629.68, "2024": 0.0}, "total": 799629.68}, {"product": "EGG BOXES", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 368829.0, "2024": 0.0}, "total": 368829.0}], "top_products": [["HATCHING EGGS A", 94140410.25], ["DELIVERY FEE", 1716000.0], ["PULP TRAYS", 799629.68]]}, {"name": "ABBA BLESS AGRI FARM CORP.", "total": 70282926.84, "by_year": {"2020": 480000.0, "2021": 24118170.0, "2022": 32169815.84, "2023": 13514941.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 480000.0, "2021": 23110365.0, "2022": 32092463.0, "2023": 0.0, "2024": 0.0}, "total": 55682828.0}, {"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 13514941.0, "2024": 0.0}, "total": 13514941.0}, {"product": "HATCHING EGGS B", "by_year": {"2020": 0.0, "2021": 940153.5, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 940153.5}, {"product": "PULP TRAYS", "by_year": {"2020": 0.0, "2021": 67651.5, "2022": 77352.84, "2023": 0.0, "2024": 0.0}, "total": 145004.34}], "top_products": [["HATCHING EGGS A", 55682828.0], ["DAVAO DOC A", 13514941.0], ["HATCHING EGGS B", 940153.5]]}, {"name": "FKIDZ TRADING", "total": 59248868.67, "by_year": {"2020": 0.0, "2021": 6691816.24, "2022": 31669139.89, "2023": 20887912.54, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 919366.0, "2022": 16206330.66, "2023": 14495912.7, "2024": 0.0}, "total": 31621609.36}, {"product": "HATCHING EGGS B", "by_year": {"2020": 0.0, "2021": 4603910.0, "2022": 10920820.08, "2023": 2505694.0, "2024": 0.0}, "total": 18030424.08}, {"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 1039851.24, "2022": 4148143.83, "2023": 2132842.33, "2024": 0.0}, "total": 7320837.4}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 52690.0, "2022": 0.0, "2023": 1674799.99, "2024": 0.0}, "total": 1727489.99}, {"product": "PULP TRAYS", "by_year": {"2020": 0.0, "2021": 75999.0, "2022": 371351.79, "2023": 71519.02, "2024": 0.0}, "total": 518869.81}, {"product": "MM3 BY PRODUCT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 22493.53, "2023": 7144.5, "2024": 0.0}, "total": 29638.03}], "top_products": [["HATCHING EGGS A", 31621609.36], ["HATCHING EGGS B", 18030424.08], ["TABLE EGGS", 7320837.4]]}, {"name": "WALK-IN", "total": 55226622.1, "by_year": {"2020": 12635234.5, "2021": 5671935.8, "2022": 18989622.67, "2023": 17929829.13, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 9271036.2, "2021": 4766636.8, "2022": 9191813.6, "2023": 6399614.6, "2024": 0.0}, "total": 29629101.2}, {"product": "TABLE EGGS", "by_year": {"2020": 1987100.86, "2021": 461726.0, "2022": 1611149.0, "2023": 3775143.84, "2024": 0.0}, "total": 7835119.7}, {"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 3554412.02, "2023": 1569899.5, "2024": 0.0}, "total": 5124311.52}, {"product": "CULLED CHICKEN", "by_year": {"2020": 683408.5, "2021": 174485.0, "2022": 2268720.0, "2023": 1341580.0, "2024": 0.0}, "total": 4468193.5}, {"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 723691.0, "2023": 1893600.0, "2024": 0.0}, "total": 2617291.0}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 689833.94, "2021": 0.0, "2022": 0.0, "2023": 1751701.32, "2024": 0.0}, "total": 2441535.26}, {"product": "SASSO DRESSED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 528569.85, "2023": 55234.76, "2024": 0.0}, "total": 583804.61}, {"product": "SASSO DOC", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 498735.0, "2023": 48690.0, "2024": 0.0}, "total": 547425.0}, {"product": "HATCHING EGGS B", "by_year": {"2020": 0.0, "2021": 258588.0, "2022": 278200.0, "2023": 0.0, "2024": 0.0}, "total": 536788.0}, {"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 458995.95, "2024": 0.0}, "total": 458995.95}, {"product": "CATTLE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 270000.0, "2023": 53600.0, "2024": 0.0}, "total": 323600.0}, {"product": "DAVAO DOC B", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 243825.0, "2024": 0.0}, "total": 243825.0}, {"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 129995.0, "2024": 0.0}, "total": 129995.0}, {"product": "MEAT : BEEF", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 119841.16, "2024": 0.0}, "total": 119841.16}, {"product": "SASSO DRESSED CHICKEN BY PRODUCT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 51522.26, "2023": 0.0, "2024": 0.0}, "total": 51522.26}, {"product": "PULP TRAYS", "by_year": {"2020": 2355.0, "2021": 0.0, "2022": 10361.94, "2023": 19500.0, "2024": 0.0}, "total": 32216.94}, {"product": "DAVAO DOC BY PRODUCT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 30866.0, "2024": 0.0}, "total": 30866.0}, {"product": "DAVAO DOC REJECT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 30398.0, "2024": 0.0}, "total": 30398.0}, {"product": "OTHERS-CARNERO", "by_year": {"2020": 0.0, "2021": 10500.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 10500.0}, {"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 7344.0, "2024": 0.0}, "total": 7344.0}, {"product": "EGG BOXES", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2448.0, "2023": 0.0, "2024": 0.0}, "total": 2448.0}, {"product": "DELIVERY FEE", "by_year": {"2020": 1500.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 1500.0}], "top_products": [["MARKET HOGS", 29629101.2], ["TABLE EGGS", 7835119.7], ["SASSO LIVE CHICKEN", 5124311.52]]}, {"name": "FOSTER FOODS INC.", "total": 30465000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 30465000.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 30465000.0, "2024": 0.0}, "total": 30465000.0}], "top_products": [["HATCHING EGGS A", 30465000.0]]}, {"name": "EUGENE LIMLAO", "total": 28629434.0, "by_year": {"2020": 0.0, "2021": 1922384.0, "2022": 6144813.0, "2023": 20562237.0, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 0.0, "2021": 1922384.0, "2022": 6144813.0, "2023": 20562237.0, "2024": 0.0}, "total": 28629434.0}], "top_products": [["MARKET HOGS", 28629434.0]]}, {"name": "MMHC", "total": 28599382.61, "by_year": {"2020": 321126.2, "2021": 3278580.0, "2022": 11255200.93, "2023": 13744475.48, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 321126.2, "2021": 3278580.0, "2022": 5478183.0, "2023": 5549139.0, "2024": 0.0}, "total": 14627028.2}, {"product": "CATTLE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 5777017.93, "2023": 6292090.0, "2024": 0.0}, "total": 12069107.93}, {"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1569981.48, "2024": 0.0}, "total": 1569981.48}, {"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 333265.0, "2024": 0.0}, "total": 333265.0}], "top_products": [["MARKET HOGS", 14627028.2], ["CATTLE", 12069107.93], ["MEAT : PORK", 1569981.48]]}, {"name": "NUTRIFRESH CHICKEN TRADING CORP.", "total": 28162542.75, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 28162542.75, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 28042542.75, "2024": 0.0}, "total": 28042542.75}, {"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 120000.0, "2024": 0.0}, "total": 120000.0}], "top_products": [["HATCHING EGGS A", 28042542.75], ["DAVAO DOC A", 120000.0]]}, {"name": "CARLOS GAMBOA", "total": 19662927.0, "by_year": {"2020": 1250000.0, "2021": 54400.0, "2022": 11245582.0, "2023": 7112945.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 1250000.0, "2021": 54400.0, "2022": 8731095.0, "2023": 6823245.0, "2024": 0.0}, "total": 16858740.0}, {"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2514487.0, "2023": 289700.0, "2024": 0.0}, "total": 2804187.0}], "top_products": [["CULLED CHICKEN", 16858740.0], ["SASSO LIVE CHICKEN", 2804187.0]]}, {"name": "EARLICK TABACO", "total": 19343522.4, "by_year": {"2020": 0.0, "2021": 526888.0, "2022": 6237105.8, "2023": 12579528.6, "2024": 0.0}, "lines": [{"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 526888.0, "2022": 6237105.8, "2023": 6309939.0, "2024": 0.0}, "total": 13073932.8}, {"product": "MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 6269589.6, "2024": 0.0}, "total": 6269589.6}], "top_products": [["PF-MARKET HOGS", 13073932.8], ["MARKET HOGS", 6269589.6]]}, {"name": "HONEY FAITH CAPUL", "total": 17985685.0, "by_year": {"2020": 2518765.0, "2021": 261370.0, "2022": 6382190.0, "2023": 8823360.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 2518765.0, "2021": 261370.0, "2022": 6382190.0, "2023": 8823360.0, "2024": 0.0}, "total": 17985685.0}], "top_products": [["CULLED CHICKEN", 17985685.0]]}, {"name": "JOHN GROSS", "total": 17474757.5, "by_year": {"2020": 0.0, "2021": 5827866.0, "2022": 7611124.1, "2023": 4035767.4, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 0.0, "2021": 5827866.0, "2022": 7538235.6, "2023": 4008822.4, "2024": 0.0}, "total": 17374924.0}, {"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 66850.0, "2023": 22070.0, "2024": 0.0}, "total": 88920.0}, {"product": "SASSO HATCHING EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 6000.0, "2023": 0.0, "2024": 0.0}, "total": 6000.0}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4875.0, "2024": 0.0}, "total": 4875.0}, {"product": "PULP TRAYS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 38.5, "2023": 0.0, "2024": 0.0}, "total": 38.5}], "top_products": [["MARKET HOGS", 17374924.0], ["TABLE EGGS", 88920.0], ["SASSO HATCHING EGGS", 6000.0]]}, {"name": "JUSTINIANO CASERES", "total": 10021338.0, "by_year": {"2020": 0.0, "2021": 10021338.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 0.0, "2021": 8502413.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 8502413.0}, {"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 1518925.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 1518925.0}], "top_products": [["MARKET HOGS", 8502413.0], ["PF-MARKET HOGS", 1518925.0]]}, {"name": "MARY ANN VALDERRAMA", "total": 9893850.0, "by_year": {"2020": 2675000.0, "2021": 0.0, "2022": 5685600.0, "2023": 1533250.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 2675000.0, "2021": 0.0, "2022": 5685600.0, "2023": 1533250.0, "2024": 0.0}, "total": 9893850.0}], "top_products": [["CULLED CHICKEN", 9893850.0]]}, {"name": "SHEILA SANCHEZ", "total": 9623861.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4776288.0, "2023": 4847573.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4636000.0, "2023": 4788500.0, "2024": 0.0}, "total": 9424500.0}, {"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 140288.0, "2023": 59073.0, "2024": 0.0}, "total": 199361.0}], "top_products": [["CULLED CHICKEN", 9424500.0], ["SASSO LIVE CHICKEN", 199361.0]]}, {"name": "MEAT JAS 4 U", "total": 9388825.57, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 9388825.57, "2024": 0.0}, "lines": [{"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 9388825.57, "2024": 0.0}, "total": 9388825.57}], "top_products": [["MEAT : PORK", 9388825.57]]}, {"name": "BENEDICTO LAO", "total": 8698363.8, "by_year": {"2020": 5639851.0, "2021": 3058512.8, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 5639851.0, "2021": 2654262.8, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 8294113.8}, {"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 404250.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 404250.0}], "top_products": [["MARKET HOGS", 8294113.8], ["PF-MARKET HOGS", 404250.0]]}, {"name": "OGIS RTMG", "total": 8686800.0, "by_year": {"2020": 8686800.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 8686800.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 8686800.0}], "top_products": [["HATCHING EGGS A", 8686800.0]]}, {"name": "ROSALIE CORVERA", "total": 8625065.0, "by_year": {"2020": 2792565.0, "2021": 0.0, "2022": 3370000.0, "2023": 2462500.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 2792565.0, "2021": 0.0, "2022": 3370000.0, "2023": 2462500.0, "2024": 0.0}, "total": 8625065.0}], "top_products": [["CULLED CHICKEN", 8625065.0]]}, {"name": "WEALTHCORE HATCHERY ENTERPRISE INC.", "total": 8575866.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4287933.0, "2024": 4287933.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4287933.0, "2024": 4287933.0}, "total": 8575866.0}], "top_products": [["HATCHING EGGS A", 8575866.0]]}, {"name": "DONNABELLA AGRO VENTURES", "total": 7548980.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 7548980.5, "2024": 0.0}, "lines": [{"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 7548980.5, "2024": 0.0}, "total": 7548980.5}], "top_products": [["DAVAO DOC A", 7548980.5]]}, {"name": "RAMIR ROQUE", "total": 7241750.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4241750.0, "2023": 3000000.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4241750.0, "2023": 3000000.0, "2024": 0.0}, "total": 7241750.0}], "top_products": [["CULLED CHICKEN", 7241750.0]]}, {"name": "AGNES DELA VEGA", "total": 5956390.0, "by_year": {"2020": 5956390.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 5956390.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 5956390.0}], "top_products": [["CULLED CHICKEN", 5956390.0]]}, {"name": "LUCILLE JOY JAGOCOY", "total": 5892458.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 5892458.5, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 3568781.75, "2024": 0.0}, "total": 3568781.75}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2318426.75, "2024": 0.0}, "total": 2318426.75}, {"product": "MM3 BY PRODUCT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 5250.0, "2024": 0.0}, "total": 5250.0}], "top_products": [["TABLE EGGS", 3568781.75], ["HATCHING EGGS - DOWNGRADED TO TE", 2318426.75], ["MM3 BY PRODUCT", 5250.0]]}, {"name": "ANAKCIANO", "total": 5481000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 5481000.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 5481000.0, "2024": 0.0}, "total": 5481000.0}], "top_products": [["HATCHING EGGS A", 5481000.0]]}, {"name": "ALDRIN DIAZ", "total": 5290777.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 5290777.5, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 5290777.5, "2023": 0.0, "2024": 0.0}, "total": 5290777.5}], "top_products": [["PF-MARKET HOGS", 5290777.5]]}, {"name": "RICKY JAMES BALANSAG", "total": 4869015.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2969015.0, "2023": 1900000.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2969015.0, "2023": 1900000.0, "2024": 0.0}, "total": 4869015.0}], "top_products": [["CULLED CHICKEN", 4869015.0]]}, {"name": "JOSEFA ARLITA ARSULA", "total": 4815000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2915000.0, "2023": 1900000.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 2915000.0, "2023": 1900000.0, "2024": 0.0}, "total": 4815000.0}], "top_products": [["CULLED CHICKEN", 4815000.0]]}, {"name": "NELYN DINGLASA", "total": 4701596.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4701596.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 4701596.0, "2023": 0.0, "2024": 0.0}, "total": 4701596.0}], "top_products": [["PF-MARKET HOGS", 4701596.0]]}, {"name": "RAMIL EFREN", "total": 4684338.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 3964084.0, "2023": 720254.0, "2024": 0.0}, "lines": [{"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 3964084.0, "2023": 720254.0, "2024": 0.0}, "total": 4684338.0}], "top_products": [["PF-MARKET HOGS", 4684338.0]]}, {"name": "JUN PREJAS", "total": 4355780.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4355780.0, "2024": 0.0}, "lines": [{"product": "GEN SAN DOC", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4355780.0, "2024": 0.0}, "total": 4355780.0}], "top_products": [["GEN SAN DOC", 4355780.0]]}, {"name": "ROSITA ADLAWAN", "total": 4303956.65, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4303956.65, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2874912.8, "2024": 0.0}, "total": 2874912.8}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1429043.85, "2024": 0.0}, "total": 1429043.85}], "top_products": [["TABLE EGGS", 2874912.8], ["HATCHING EGGS - DOWNGRADED TO TE", 1429043.85]]}, {"name": "LOWELA JAGOCOY", "total": 3479075.55, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 3479075.55, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2761634.45, "2024": 0.0}, "total": 2761634.45}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 717441.1, "2024": 0.0}, "total": 717441.1}], "top_products": [["TABLE EGGS", 2761634.45], ["HATCHING EGGS - DOWNGRADED TO TE", 717441.1]]}, {"name": "PRO-PORK FEEDS MANUFACTURING CORP.", "total": 3164832.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 3164832.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 3164832.0, "2024": 0.0}, "total": 3164832.0}], "top_products": [["HATCHING EGGS A", 3164832.0]]}, {"name": "ALVIN LOREDO", "total": 2656985.4, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2656985.4, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1883641.95, "2024": 0.0}, "total": 1883641.95}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 773343.45, "2024": 0.0}, "total": 773343.45}], "top_products": [["TABLE EGGS", 1883641.95], ["HATCHING EGGS - DOWNGRADED TO TE", 773343.45]]}, {"name": "DANTE BERGANIO", "total": 2500000.0, "by_year": {"2020": 2500000.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 2500000.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 2500000.0}], "top_products": [["CULLED CHICKEN", 2500000.0]]}, {"name": "CONCON DELA CRUZ", "total": 2469256.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2469256.5, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2136418.67, "2024": 0.0}, "total": 2136418.67}, {"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 332837.83, "2024": 0.0}, "total": 332837.83}], "top_products": [["HATCHING EGGS - DOWNGRADED TO TE", 2136418.67], ["TABLE EGGS", 332837.83]]}, {"name": "JOSHUA PAGDATO", "total": 2400000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2400000.0, "2024": 0.0}, "lines": [{"product": "CATTLE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2400000.0, "2024": 0.0}, "total": 2400000.0}], "top_products": [["CATTLE", 2400000.0]]}, {"name": "HILTON ALARCON", "total": 2293746.75, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2293746.75, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1708922.55, "2024": 0.0}, "total": 1708922.55}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 584824.2, "2024": 0.0}, "total": 584824.2}], "top_products": [["TABLE EGGS", 1708922.55], ["HATCHING EGGS - DOWNGRADED TO TE", 584824.2]]}, {"name": "LUDILYN ADRAN", "total": 2255000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2255000.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2255000.0, "2024": 0.0}, "total": 2255000.0}], "top_products": [["CULLED CHICKEN", 2255000.0]]}, {"name": "ALLAN LEGASPI", "total": 2137000.0, "by_year": {"2020": 1565000.0, "2021": 0.0, "2022": 572000.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 1565000.0, "2021": 0.0, "2022": 572000.0, "2023": 0.0, "2024": 0.0}, "total": 2137000.0}], "top_products": [["CULLED CHICKEN", 2137000.0]]}, {"name": "CASTRO TINAO", "total": 2107500.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2107500.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 2107500.0, "2024": 0.0}, "total": 2107500.0}], "top_products": [["CULLED CHICKEN", 2107500.0]]}, {"name": "RUBY BONIAO", "total": 1954586.4, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1954586.4, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1615852.8, "2024": 0.0}, "total": 1615852.8}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 338733.6, "2024": 0.0}, "total": 338733.6}], "top_products": [["TABLE EGGS", 1615852.8], ["HATCHING EGGS - DOWNGRADED TO TE", 338733.6]]}, {"name": "VON VISCAYNO", "total": 1671027.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 792540.0, "2023": 878487.0, "2024": 0.0}, "lines": [{"product": "PF-MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 792540.0, "2023": 878487.0, "2024": 0.0}, "total": 1671027.0}], "top_products": [["PF-MARKET HOGS", 1671027.0]]}, {"name": "GAISANO CDEO", "total": 1433436.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1433436.0, "2024": 0.0}, "lines": [{"product": "MARKET HOGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 1433436.0, "2024": 0.0}, "total": 1433436.0}], "top_products": [["MARKET HOGS", 1433436.0]]}, {"name": "ANDREW ALCOMENDRAS", "total": 1313385.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 1101885.0, "2023": 211500.0, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 1101885.0, "2023": 211500.0, "2024": 0.0}, "total": 1313385.0}], "top_products": [["TABLE EGGS", 1313385.0]]}, {"name": "DENNIS MENIANO", "total": 1190140.0, "by_year": {"2020": 1190140.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 1190140.0, "2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}, "total": 1190140.0}], "top_products": [["CULLED CHICKEN", 1190140.0]]}, {"name": "DARWIN CANDINATO", "total": 743333.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 743333.5, "2024": 0.0}, "lines": [{"product": "DAVAO DOC BY PRODUCT", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 743333.5, "2024": 0.0}, "total": 743333.5}], "top_products": [["DAVAO DOC BY PRODUCT", 743333.5]]}, {"name": "JONATHAN LINDAHOG", "total": 601810.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 601810.0, "2024": 0.0}, "lines": [{"product": "CULLED SOW", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 601810.0, "2024": 0.0}, "total": 601810.0}], "top_products": [["CULLED SOW", 601810.0]]}, {"name": "AVIPORC", "total": 520500.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 520500.0, "2024": 0.0}, "lines": [{"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 520500.0, "2024": 0.0}, "total": 520500.0}], "top_products": [["DAVAO DOC A", 520500.0]]}, {"name": "MARIO CEBALLOS", "total": 450000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 140000.0, "2023": 310000.0, "2024": 0.0}, "lines": [{"product": "CULLED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 140000.0, "2023": 310000.0, "2024": 0.0}, "total": 450000.0}], "top_products": [["CULLED CHICKEN", 450000.0]]}, {"name": "A7 AGRI TRADING", "total": 442764.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 442764.0, "2024": 0.0}, "lines": [{"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 442764.0, "2024": 0.0}, "total": 442764.0}], "top_products": [["DAVAO DOC A", 442764.0]]}, {"name": "ARGIE DUNGOG", "total": 350032.94, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 350032.94, "2024": 0.0}, "lines": [{"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 184987.48, "2024": 0.0}, "total": 184987.48}, {"product": "MEAT : BEEF", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 122631.46, "2024": 0.0}, "total": 122631.46}, {"product": "SASSO DRESSED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 42414.0, "2024": 0.0}, "total": 42414.0}], "top_products": [["MEAT : PORK", 184987.48], ["MEAT : BEEF", 122631.46], ["SASSO DRESSED CHICKEN", 42414.0]]}, {"name": "FERDINAND LANGAMIN", "total": 284185.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 170185.0, "2023": 114000.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 170185.0, "2023": 114000.0, "2024": 0.0}, "total": 284185.0}], "top_products": [["SASSO LIVE CHICKEN", 284185.0]]}, {"name": "SALARY DEDUCT (EMPLOYEES)", "total": 239860.65, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 239860.65, "2024": 0.0}, "lines": [{"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 206674.67, "2024": 0.0}, "total": 206674.67}, {"product": "MEAT : BEEF", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 33185.98, "2024": 0.0}, "total": 33185.98}], "top_products": [["MEAT : PORK", 206674.67], ["MEAT : BEEF", 33185.98]]}, {"name": "MPQ", "total": 230828.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 230828.0, "2024": 0.0}, "lines": [{"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 230828.0, "2024": 0.0}, "total": 230828.0}], "top_products": [["DAVAO DOC A", 230828.0]]}, {"name": "ELJHON BERDIN", "total": 230125.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 66375.0, "2023": 163750.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 66375.0, "2023": 163750.0, "2024": 0.0}, "total": 230125.0}], "top_products": [["SASSO LIVE CHICKEN", 230125.0]]}, {"name": "MEATWORLD INTERNATIONAL INC.", "total": 197080.8, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 197080.8, "2024": 0.0}, "lines": [{"product": "MEAT : PORK", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 197080.8, "2024": 0.0}, "total": 197080.8}], "top_products": [["MEAT : PORK", 197080.8]]}, {"name": "MARRY JANE LINDUNGAN", "total": 196210.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 196210.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 196210.0, "2024": 0.0}, "total": 196210.0}], "top_products": [["SASSO LIVE CHICKEN", 196210.0]]}, {"name": "NENITA VIANA", "total": 191800.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 191800.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 191800.0, "2024": 0.0}, "total": 191800.0}], "top_products": [["SASSO LIVE CHICKEN", 191800.0]]}, {"name": "MARICEL SUMARAGO", "total": 181850.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 181850.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 181850.0, "2024": 0.0}, "total": 181850.0}], "top_products": [["SASSO LIVE CHICKEN", 181850.0]]}, {"name": "J-O-Y AGRIVET SUPPLY", "total": 126620.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 126620.0, "2024": 0.0}, "lines": [{"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 107450.0, "2024": 0.0}, "total": 107450.0}, {"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 19170.0, "2024": 0.0}, "total": 19170.0}], "top_products": [["HATCHING EGGS - DOWNGRADED TO TE", 107450.0], ["TABLE EGGS", 19170.0]]}, {"name": "MAGLASANG FARM", "total": 125762.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 125762.0, "2024": 0.0}, "lines": [{"product": "DAVAO DOC A", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 125762.0, "2024": 0.0}, "total": 125762.0}], "top_products": [["DAVAO DOC A", 125762.0]]}, {"name": "NAMI CERILLA ESTOBAR", "total": 125000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 125000.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 125000.0, "2024": 0.0}, "total": 125000.0}], "top_products": [["SASSO LIVE CHICKEN", 125000.0]]}, {"name": "KABULURAN AGRI FARM", "total": 117770.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 117770.0, "2023": 0.0, "2024": 0.0}, "lines": [{"product": "CATTLE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 117770.0, "2023": 0.0, "2024": 0.0}, "total": 117770.0}], "top_products": [["CATTLE", 117770.0]]}, {"name": "JAYRICK LINDUNGAN", "total": 106880.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 106880.0, "2024": 0.0}, "lines": [{"product": "SASSO LIVE CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 106880.0, "2024": 0.0}, "total": 106880.0}], "top_products": [["SASSO LIVE CHICKEN", 106880.0]]}, {"name": "MELBALGAS VAFLOR", "total": 102900.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 102900.0, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 90900.0, "2024": 0.0}, "total": 90900.0}, {"product": "HATCHING EGGS - DOWNGRADED TO TE", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 12000.0, "2024": 0.0}, "total": 12000.0}], "top_products": [["TABLE EGGS", 90900.0], ["HATCHING EGGS - DOWNGRADED TO TE", 12000.0]]}, {"name": "DAVE DOLORFO", "total": 88900.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 88900.0, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 88900.0, "2024": 0.0}, "total": 88900.0}], "top_products": [["TABLE EGGS", 88900.0]]}, {"name": "AZON'S BONELESS LECHON", "total": 79035.66, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 79035.66, "2024": 0.0}, "lines": [{"product": "SASSO DRESSED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 79035.66, "2024": 0.0}, "total": 79035.66}], "top_products": [["SASSO DRESSED CHICKEN", 79035.66]]}, {"name": "GINA'S NATIVE CHICKEN & SEAFOODS", "total": 66185.34, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 66185.34, "2024": 0.0}, "lines": [{"product": "SASSO DRESSED CHICKEN", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 66185.34, "2024": 0.0}, "total": 66185.34}], "top_products": [["SASSO DRESSED CHICKEN", 66185.34]]}, {"name": "YASSER JAN PAMA", "total": 57100.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 57100.0, "2024": 0.0}, "lines": [{"product": "SASSO DOC", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 57100.0, "2024": 0.0}, "total": 57100.0}], "top_products": [["SASSO DOC", 57100.0]]}, {"name": "JACK DEL RIO", "total": 4472.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4472.0, "2024": 0.0}, "lines": [{"product": "TABLE EGGS", "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4472.0, "2024": 0.0}, "total": 4472.0}], "top_products": [["TABLE EGGS", 4472.0]]}], "top_products": [{"name": "HATCHING EGGS A", "total": 1626214337.13, "by_year": {"2020": 284740432.0, "2021": 113635577.42, "2022": 520447649.66, "2023": 703102745.05, "2024": 4287933.0}}, {"name": "MARKET HOGS", "total": 1453536764.25, "by_year": {"2020": 87518930.05, "2021": 305075420.0, "2022": 489776162.0, "2023": 571166252.2, "2024": 0.0}}, {"name": "CULLED CHICKEN", "total": 100777828.5, "by_year": {"2020": 21131268.5, "2021": 490255.0, "2022": 41911370.0, "2023": 37244935.0, "2024": 0.0}}, {"name": "PF-MARKET HOGS", "total": 40865158.3, "by_year": {"2020": 0.0, "2021": 10230788.0, "2022": 22718346.3, "2023": 7916024.0, "2024": 0.0}}, {"name": "TABLE EGGS", "total": 31841553.23, "by_year": {"2020": 1987100.86, "2021": 1501577.24, "2022": 6928027.83, "2023": 21424847.3, "2024": 0.0}}, {"name": "DAVAO DOC A", "total": 26091909.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 26091909.5, "2024": 0.0}}, {"name": "HATCHING EGGS B", "total": 19507365.58, "by_year": {"2020": 0.0, "2021": 5802651.5, "2022": 11199020.08, "2023": 2505694.0, "2024": 0.0}}, {"name": "CATTLE", "total": 14910477.93, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 6164787.93, "2023": 8745690.0, "2024": 0.0}}, {"name": "HATCHING EGGS - DOWNGRADED TO TE", "total": 12591581.87, "by_year": {"2020": 689833.94, "2021": 52690.0, "2022": 0.0, "2023": 11849057.93, "2024": 0.0}}, {"name": "MEAT : PORK", "total": 12021045.95, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 12021045.95, "2024": 0.0}}, {"name": "SASSO LIVE CHICKEN", "total": 9443909.52, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 6445747.02, "2023": 2998162.5, "2024": 0.0}}, {"name": "PULP TRAYS", "total": 9198078.19, "by_year": {"2020": 2355.0, "2021": 396893.0, "2022": 4346293.06, "2023": 4452537.13, "2024": 0.0}}, {"name": "GEN SAN DOC", "total": 4355780.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 4355780.0, "2024": 0.0}}, {"name": "DELIVERY FEE", "total": 1781500.0, "by_year": {"2020": 1500.0, "2021": 0.0, "2022": 0.0, "2023": 1780000.0, "2024": 0.0}}, {"name": "EGG BOXES", "total": 1296396.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 314136.0, "2023": 982260.0, "2024": 0.0}}, {"name": "SASSO DRESSED CHICKEN", "total": 1044036.21, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 801166.45, "2023": 242869.76, "2024": 0.0}}, {"name": "DAVAO DOC BY PRODUCT", "total": 774199.5, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 774199.5, "2024": 0.0}}, {"name": "SASSO DOC", "total": 604525.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 498735.0, "2023": 105790.0, "2024": 0.0}}, {"name": "CULLED SOW", "total": 601810.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 601810.0, "2024": 0.0}}, {"name": "MEAT : BEEF", "total": 275658.6, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 275658.6, "2024": 0.0}}, {"name": "DAVAO DOC B", "total": 243825.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 243825.0, "2024": 0.0}}, {"name": "SASSO DRESSED CHICKEN BY PRODUCT", "total": 51522.26, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 51522.26, "2023": 0.0, "2024": 0.0}}, {"name": "MM3 BY PRODUCT", "total": 34888.03, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 22493.53, "2023": 12394.5, "2024": 0.0}}, {"name": "DAVAO DOC REJECT", "total": 30398.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 0.0, "2023": 30398.0, "2024": 0.0}}, {"name": "OTHERS-CARNERO", "total": 10500.0, "by_year": {"2020": 0.0, "2021": 10500.0, "2022": 0.0, "2023": 0.0, "2024": 0.0}}, {"name": "SASSO HATCHING EGGS", "total": 6000.0, "by_year": {"2020": 0.0, "2021": 0.0, "2022": 6000.0, "2023": 0.0, "2024": 0.0}}], "customer_years": [2020, 2021, 2022, 2023, 2024]}</script>
+<script>const DATA = JSON.parse(document.getElementById('dashboard-data').textContent);
 
-<div id="stampLayer"></div>
-
-<script>
-(function(){
-  // Manager PIN — required to edit or delete a cut. Change this to your own PIN.
-  const MANAGER_PIN = '1234';
-
-  const CAT_LABEL = { pork:'Pork', beef:'Beef', chicken:'Chicken', lamb:'Lamb' };
-  const CAT_COLOR = { pork:'var(--c-pork)', beef:'var(--c-beef)', chicken:'var(--c-chicken)', lamb:'var(--c-lamb)' };
-  const REASONS = {
-    in: ['Production Yield','Return','Transfer from other cold storage'],
-    out: ['Sold','Consumption','Spoilage','Inventory adjustment']
-  };
-
-  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function hoursAgo(h){ return Date.now() - h*3600*1000; }
-
-  let state = {
-    items: [
-      { id: uid(), name:'Ribeye Steak',    category:'beef',    unit:'kg',  stock:18,  reorder:10 },
-      { id: uid(), name:'Ground Beef',     category:'beef',    unit:'kg',  stock:34,  reorder:15 },
-      { id: uid(), name:'Beef Brisket',    category:'beef',    unit:'kg',  stock:9,   reorder:12 },
-      { id: uid(), name:'Pork Belly',      category:'pork',    unit:'kg',  stock:22,  reorder:10 },
-      { id: uid(), name:'Bacon',           category:'pork',    unit:'kg',  stock:14,  reorder:8  },
-      { id: uid(), name:'Sausage Links',   category:'pork',    unit:'kg',  stock:16,  reorder:10 },
-      { id: uid(), name:'Chicken Breast',  category:'chicken', unit:'kg',  stock:40,  reorder:20 },
-      { id: uid(), name:'Chicken Wings',   category:'chicken', unit:'kg',  stock:6,   reorder:10 },
-      { id: uid(), name:'Lamb Chops',      category:'lamb',    unit:'kg',  stock:11,  reorder:8  },
-    ],
-    transactions: []
-  };
-
-  // seed some history
-  (function seedHistory(){
-    const seeds = [
-      { name:'Ribeye Steak', type:'in',  qty:12, reason:'Production Yield', ref:'PO-1041', batch:'BC-0619', stockman:'R. Delos Santos', ts: hoursAgo(46) },
-      { name:'Chicken Breast', type:'out', qty:15, reason:'Sold', ref:'INV-2207', batch:'BC-0620', stockman:'J. Cabrera', ts: hoursAgo(30) },
-      { name:'Beef Brisket', type:'out', qty:6, reason:'Consumption', ref:'KIT-0912', batch:'BC-0621', stockman:'J. Cabrera', ts: hoursAgo(20) },
-      { name:'Pork Belly', type:'in', qty:5, reason:'Transfer from other cold storage', ref:'PO-1042', batch:'BC-0622', stockman:'R. Delos Santos', ts: hoursAgo(9) },
-      { name:'Chicken Wings', type:'out', qty:9, reason:'Sold', ref:'INV-2211', batch:'BC-0623', stockman:'M. Villareal', ts: hoursAgo(4) },
-      { name:'Ground Beef', type:'out', qty:7, reason:'Sold', ref:'INV-2213', batch:'BC-0624', stockman:'M. Villareal', ts: hoursAgo(1.2) },
-      { name:'Bacon', type:'in', qty:6, reason:'Production Yield', ref:'PO-1044', batch:'BC-0625', stockman:'R. Delos Santos', ts: hoursAgo(0.4) },
-    ];
-    seeds.forEach(s=>{
-      const item = state.items.find(i=>i.name===s.name);
-      if(item){ state.transactions.push({ id: uid(), itemId:item.id, itemName:item.name, category:item.category, unit:item.unit, type:s.type, qty:s.qty, reason:s.reason, ref:s.ref, batch:s.batch, stockman:s.stockman, note:'', ts:s.ts }); }
-    });
-    state.transactions.sort((a,b)=>b.ts-a.ts);
-  })();
-
-  let currentType = 'in';
-  let removeConfirmId = null;
-
-  // ===== helpers =====
-  function weightKg(item){
-    if(item.unit==='kg') return item.stock;
-    if(item.unit==='lb') return item.stock*0.453592;
-    return 0;
+/* ---------------- formatters ---------------- */
+const PHP = (n, opts={}) => {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  if (opts.compact){
+    if (abs >= 1e9) return '₱' + (n/1e9).toFixed(2) + 'B';
+    if (abs >= 1e6) return '₱' + (n/1e6).toFixed(1) + 'M';
+    if (abs >= 1e3) return '₱' + (n/1e3).toFixed(0) + 'K';
+    return '₱' + n.toFixed(0);
   }
-  function status(item){
-    if(item.stock < item.reorder) return 'low';
-    if(item.stock < item.reorder*1.3) return 'watch';
-    return 'ok';
+  return '₱' + n.toLocaleString('en-PH', {maximumFractionDigits:0});
+};
+const NUM = (n, opts={}) => {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (opts.compact){
+    const abs = Math.abs(n);
+    if (abs >= 1e9) return (n/1e9).toFixed(2) + 'B';
+    if (abs >= 1e6) return (n/1e6).toFixed(1) + 'M';
+    if (abs >= 1e3) return (n/1e3).toFixed(0) + 'K';
+    return n.toFixed(0);
   }
-  function gaugePct(item){
-    const max = Math.max(item.reorder*2, 1);
-    return Math.min(100, (item.stock/max)*100);
-  }
-  function fmt(n, d){ return Number(n).toLocaleString(undefined,{minimumFractionDigits:d||0, maximumFractionDigits:d||1}); }
-  function timeAgo(ts){
-    const mins = Math.round((Date.now()-ts)/60000);
-    if(mins < 1) return 'just now';
-    if(mins < 60) return mins+'m ago';
-    const hrs = Math.round(mins/60);
-    if(hrs < 24) return hrs+'h ago';
-    const days = Math.round(hrs/24);
-    return days+'d ago';
-  }
+  return n.toLocaleString('en-PH', {maximumFractionDigits:0});
+};
+const PCT = (n) => n === null || n === undefined || isNaN(n) ? '—' : (n>0?'+':'') + n.toFixed(1) + '%';
 
-  // ===== render: stats =====
-  function txKg(t){ return t.unit==='pcs' ? 0 : t.unit==='lb' ? t.qty*0.453592 : t.qty; }
+/* ---- MMFI design-system palette ---- */
+const C = {
+  ink:'#0d0d0d', inkSoft:'#333333', grey:'#666666', greySoft:'#999999',
+  line:'#dcdcdc', olive:'#8DB600', oliveDark:'#5c8000', oliveDeep:'#4a6600',
+  hoverTan:'#f3e7d8', gridLine:'#e9e9e9', rust:'#8a3b2b'
+};
+const CAT_PALETTE = ['#5c8000','#333333','#8DB600','#999999','#4d4d4d','#1a1a1a','#a8cc00','#c2c2c2','#4a6600','#666666'];
+const YEAR_PALETTE = ['#999999','#333333','#8DB600','#5c8000','#8a3b2b','#a8cc00'];
 
-  function renderStats(){
-    const totalKg = state.items.reduce((s,i)=>s+weightKg(i),0);
-    const totalPcs = state.items.filter(i=>i.unit==='pcs').reduce((s,i)=>s+i.stock,0);
-    const lowCount = state.items.filter(i=>status(i)==='low').length;
+/* =====================================================================
+   SVG CHART TOOLKIT — zero external dependencies
+   ===================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text){
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs||{}) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+const tooltipEl = document.getElementById('chart-tooltip');
+function showTip(evt, html){
+  tooltipEl.innerHTML = html;
+  tooltipEl.style.display = 'block';
+  positionTip(evt);
+}
+function positionTip(evt){
+  const pad = 14;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  const tw = tooltipEl.offsetWidth || 160, th = tooltipEl.offsetHeight || 40;
+  if (x + tw > window.innerWidth - 8) x = evt.clientX - tw - pad;
+  if (y + th > window.innerHeight - 8) y = evt.clientY - th - pad;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = y + 'px';
+}
+function hideTip(){ tooltipEl.style.display = 'none'; }
 
-    const allTimeIn = state.transactions.filter(t=>t.type==='in').reduce((s,t)=>s+txKg(t),0);
-    const allTimeOut = state.transactions.filter(t=>t.type==='out').reduce((s,t)=>s+txKg(t),0);
+function niceStep(maxVal){
+  if (!maxVal || maxVal <= 0) return {niceMax:1, step:0.25};
+  const rough = maxVal / 4;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / mag;
+  let step;
+  if (norm < 1.5) step = 1*mag; else if (norm < 3) step = 2*mag; else if (norm < 7) step = 5*mag; else step = 10*mag;
+  const niceMax = Math.ceil(maxVal / step) * step;
+  return {niceMax, step};
+}
 
-    const startToday = new Date(); startToday.setHours(0,0,0,0);
-    const todays = state.transactions.filter(t=>t.ts>=startToday.getTime());
-    const inKg = todays.filter(t=>t.type==='in').reduce((s,t)=>s+txKg(t),0);
-    const outKg = todays.filter(t=>t.type==='out').reduce((s,t)=>s+txKg(t),0);
+function initSvg(containerId){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const rect = container.getBoundingClientRect();
+  const W = Math.max(Math.round(rect.width), 100);
+  const H = Math.max(Math.round(rect.height), 100);
+  const svg = el('svg', {width:W, height:H, viewBox:`0 0 ${W} ${H}`});
+  container.appendChild(svg);
+  return {container, svg, W, H};
+}
 
-    const cards = [
-      { label:'Total stock on hand', value: fmt(totalKg,1)+' <small>kg</small>' + (totalPcs? ' <small>+ '+fmt(totalPcs,0)+' pcs</small>':''), accent:'var(--gold)' },
-      { label:'Total stock in', value: fmt(allTimeIn,1)+' <small>kg</small>', sub:'+'+fmt(inKg,1)+' kg today', accent:'var(--sage)' },
-      { label:'Total stock out', value: fmt(allTimeOut,1)+' <small>kg</small>', sub:'-'+fmt(outKg,1)+' kg today', accent:'var(--crimson)' },
-      { label:'Low stock cuts', value: lowCount, accent: lowCount? 'var(--crimson)':'var(--sage)', warn: lowCount>0, sub: lowCount? 'below reorder level' : 'all cuts stocked' },
-      { label:"Today's movement", value: '+'+fmt(inKg,1)+' / -'+fmt(outKg,1), sub:'kg in / out today', accent:'var(--gold)' },
-    ];
-    document.getElementById('stats').innerHTML = cards.map(c=>`
-      <div class="stat-card ${c.warn?'warn':''}" style="--accent:${c.accent}">
-        <p class="stat-label">${c.label}</p>
-        <div class="stat-value">${c.value}</div>
-        ${c.sub?`<div class="stat-sub">${c.sub}</div>`:''}
-      </div>
-    `).join('');
-  }
+const CHART_REGISTRY = [];
+function registerChart(fn){ CHART_REGISTRY.push(fn); fn(); }
 
-  // ===== render: inventory tag grid =====
-  function renderTagGrid(){
-    const search = document.getElementById('search').value.trim().toLowerCase();
-    const cat = document.getElementById('categoryFilter').value;
-    const sortBy = document.getElementById('sortBy').value;
-
-    let items = state.items.filter(i=>{
-      const matchesSearch = i.name.toLowerCase().includes(search);
-      const matchesCat = cat==='all' || i.category===cat;
-      return matchesSearch && matchesCat;
-    });
-
-    items = items.slice().sort((a,b)=>{
-      if(sortBy==='name') return a.name.localeCompare(b.name);
-      if(sortBy==='stockLow') return a.stock-b.stock;
-      if(sortBy==='stockHigh') return b.stock-a.stock;
-      return 0;
-    });
-
-    const grid = document.getElementById('tagGrid');
-    if(items.length===0){
-      grid.innerHTML = `<div class="empty-note">No cuts match your search — try a different filter, or add a new cut.</div>`;
-      return;
-    }
-
-    grid.innerHTML = items.map(item=>{
-      const st = status(item);
-      const pct = gaugePct(item);
-      const confirming = removeConfirmId===item.id;
-      return `
-      <div class="tag-card" data-id="${item.id}">
-        <div class="tag-hole"></div>
-        <div class="tag-top">
-          <div>
-            <span class="tag-cat" style="--cat-color:${CAT_COLOR[item.category]}">${CAT_LABEL[item.category]}</span>
-            <h3 class="tag-name">${item.name}</h3>
-          </div>
-          <div class="tag-actions">
-            <button class="tag-edit" data-edit="${item.id}">🔒 Edit</button>
-            <button class="tag-remove ${confirming?'confirming':''}" data-remove="${item.id}">${confirming? '🔒 confirm?':'✕'}</button>
-          </div>
-        </div>
-        <div class="tag-stock">${fmt(item.stock,1)} <small>${item.unit}</small></div>
-        <div class="gauge"><div class="gauge-fill ${st}" style="width:${pct}%"></div></div>
-        <div class="tag-foot">
-          <span>Reorder at ${fmt(item.reorder,1)} ${item.unit}</span>
-          <span class="tag-status ${st}">${st==='low'?'LOW STOCK':st==='watch'?'WATCH':'IN STOCK'}</span>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // ===== render: activity log =====
-  function renderLog(){
-    const log = document.getElementById('ticketLog');
-    if(state.transactions.length===0){
-      log.innerHTML = `<div class="empty-note">No movements recorded yet.</div>`;
-      return;
-    }
-    log.innerHTML = state.transactions.slice(0,25).map(t=>`
-      <div class="ticket">
-        <div class="stamp ${t.type}">${t.type==='in'?'RECEIVED':'DISPATCH'}</div>
-        <div class="ticket-body">
-          <div class="ticket-title">${t.itemName} <span style="color:var(--ink-soft); font-weight:500;">· ${t.ref||'—'}</span></div>
-          <div class="ticket-meta">${t.reason} · Batch ${t.batch||'—'} · ${t.stockman||'—'}${t.note? ' · '+t.note : ''} · ${timeAgo(t.ts)}</div>
-        </div>
-        <div class="ticket-qty ${t.type}">${t.type==='in'?'+':'-'}${fmt(t.qty,1)} ${t.unit}</div>
-      </div>
-    `).join('');
-  }
-
-  // ===== render: category chart =====
-  function renderChart(){
-    const totals = {};
-    Object.keys(CAT_LABEL).forEach(c=>totals[c]=0);
-    state.items.forEach(i=>{ totals[i.category]+=weightKg(i); });
-    const max = Math.max(...Object.values(totals), 1);
-    const el = document.getElementById('categoryChart');
-    el.innerHTML = Object.keys(CAT_LABEL).map(c=>`
-      <div class="chart-row">
-        <div class="name">${CAT_LABEL[c]}</div>
-        <div class="chart-track"><div class="chart-bar" style="width:${(totals[c]/max*100)}%; background:${CAT_COLOR[c]}"></div></div>
-        <div class="val">${fmt(totals[c],1)} kg</div>
-      </div>
-    `).join('');
-  }
-
-  // ===== movement form population =====
-  function populateMoveItemSelect(){
-    const sel = document.getElementById('moveItem');
-    const prev = sel.value;
-    sel.innerHTML = state.items.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
-    if(prev && state.items.some(i=>i.id===prev)) sel.value = prev;
-    updateMoveUnit();
-    populateReasons();
-  }
-  function updateMoveUnit(){
-    const sel = document.getElementById('moveItem');
-    const item = state.items.find(i=>i.id===sel.value);
-    document.getElementById('moveUnit').textContent = item? item.unit : '';
-  }
-  function populateReasons(){
-    const reasonSel = document.getElementById('moveReason');
-    reasonSel.innerHTML = REASONS[currentType].map(r=>`<option value="${r}">${r}</option>`).join('');
-  }
-
-  function renderAll(){
-    renderStats();
-    renderTagGrid();
-    renderLog();
-    renderChart();
-    populateMoveItemSelect();
-  }
-
-  // ===== toast / stamp feedback =====
-  function showToast(type, text){
-    const layer = document.getElementById('stampLayer');
-    const el = document.createElement('div');
-    el.className = 'toast '+(type==='out'?'out':'');
-    el.textContent = text;
-    layer.appendChild(el);
-    setTimeout(()=>el.remove(), 2700);
-  }
-
-  // ===== events: type toggle =====
-  document.querySelectorAll('.type-toggle button').forEach(btn=>{
+/* ---- generic pill-button filter row ---- */
+function makePills(containerId, items, activeValue, onSelect){
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map(it=>`<button class="btn ${it.value===activeValue?'active':''}" data-v="${it.value}">${it.label}</button>`).join('');
+  container.querySelectorAll('.btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.type-toggle button').forEach(b=>b.classList.remove('active'));
+      container.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
       btn.classList.add('active');
-      currentType = btn.dataset.type;
-      populateReasons();
+      onSelect(btn.dataset.v);
     });
   });
+}
+function makeSelect(containerId, items, activeValue, onSelect){
+  const sel = document.getElementById(containerId);
+  sel.innerHTML = items.map(it=>`<option value="${it.value}" ${it.value===activeValue?'selected':''}>${it.label}</option>`).join('');
+  sel.addEventListener('change', ()=> onSelect(sel.value));
+}
 
-  document.getElementById('moveItem').addEventListener('change', updateMoveUnit);
+/* ---- vertical bar chart (stacked or single-series), with optional highlighted category ---- */
+function drawBarChart(containerId, {labels, series, valueFmt, legend=true, highlightIndex=null}){
+  const {svg, W, H} = initSvg(containerId);
+  const isNarrow = W < 380;
+  const leftPad = 46;
+  const rightPad = 10;
+  const topPad = 12;
+  const legendH = legend && series.length > 1 ? (isNarrow ? 34 : 22) : 0;
+  const bottomPad = 24 + legendH;
 
-  // ===== events: movement submit =====
-  document.getElementById('movementForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const itemId = document.getElementById('moveItem').value;
-    const qty = parseFloat(document.getElementById('moveQty').value);
-    const ref = document.getElementById('moveRef').value.trim();
-    const reason = document.getElementById('moveReason').value;
-    const batch = document.getElementById('moveBatch').value.trim();
-    const stockman = document.getElementById('moveStockman').value.trim();
-    const note = document.getElementById('moveNote').value.trim();
-    const errEl = document.getElementById('moveError');
-    const item = state.items.find(i=>i.id===itemId);
+  const plotW = W - leftPad - rightPad;
+  const plotH = H - topPad - bottomPad;
+  if (plotW <= 0 || plotH <= 0) return;
 
-    if(!ref){
-      errEl.textContent = 'Reference # is required.';
-      errEl.classList.add('show');
-      document.getElementById('moveRef').focus();
-      return;
-    }
-    if(!item || !qty || qty<=0){
-      errEl.textContent = 'Enter a valid quantity.';
-      errEl.classList.add('show');
-      return;
-    }
-    if(currentType==='out' && qty>item.stock){
-      errEl.textContent = `Only ${fmt(item.stock,1)} ${item.unit} in stock — can't dispatch that much.`;
-      errEl.classList.add('show');
-      return;
-    }
-    if(!batch){
-      errEl.textContent = 'Batch Code / Production Date is required.';
-      errEl.classList.add('show');
-      document.getElementById('moveBatch').focus();
-      return;
-    }
-    if(!stockman){
-      errEl.textContent = 'Stockman In-charge is required.';
-      errEl.classList.add('show');
-      document.getElementById('moveStockman').focus();
-      return;
-    }
-    errEl.classList.remove('show');
+  const sums = labels.map((_, i) => series.reduce((s, ser) => s + (ser.data[i]||0), 0));
+  const maxVal = Math.max(...sums, 0);
+  const {niceMax, step} = niceStep(maxVal);
 
-    item.stock = currentType==='in' ? item.stock+qty : item.stock-qty;
-    item.stock = Math.round(item.stock*100)/100;
-
-    const tx = { id: uid(), itemId:item.id, itemName:item.name, category:item.category, unit:item.unit, type:currentType, qty, ref, reason, batch, stockman, note, ts: Date.now() };
-    state.transactions.unshift(tx);
-    syncAddTransaction(tx, item.stock);
-
-    document.getElementById('moveQty').value='';
-    document.getElementById('moveRef').value='';
-    document.getElementById('moveBatch').value='';
-    document.getElementById('moveStockman').value='';
-    document.getElementById('moveNote').value='';
-
-    renderAll();
-    showToast(currentType, (currentType==='in'?'RECEIVED · ':'DISPATCHED · ')+item.name+' '+(currentType==='in'?'+':'-')+fmt(qty,1)+' '+item.unit);
-
-    const card = document.querySelector(`.tag-card[data-id="${item.id}"]`);
-    if(card){ card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 900); }
-  });
-
-  // ===== events: search / filter / sort =====
-  document.getElementById('search').addEventListener('input', renderTagGrid);
-  document.getElementById('categoryFilter').addEventListener('change', renderTagGrid);
-  document.getElementById('sortBy').addEventListener('change', renderTagGrid);
-
-  // ===== PIN gate for edit / delete =====
-  const pinOverlay = document.getElementById('pinOverlay');
-  let pinCallback = null;
-  function requestPin(callback, label){
-    pinCallback = callback;
-    document.getElementById('pinInput').value = '';
-    document.getElementById('pinError').classList.remove('show');
-    const submitBtn = document.getElementById('pinSubmitBtn');
-    submitBtn.textContent = label || 'Unlock';
-    if(label === 'Delete'){
-      submitBtn.style.background = 'var(--crimson)';
-      submitBtn.style.borderColor = 'var(--crimson)';
-    } else {
-      submitBtn.style.background = '';
-      submitBtn.style.borderColor = '';
-    }
-    pinOverlay.classList.add('show');
-    setTimeout(()=>document.getElementById('pinInput').focus(), 60);
+  const steps = Math.max(1, Math.round(niceMax/step));
+  for (let i=0; i<=steps; i++){
+    const v = i*step;
+    const y = topPad + plotH - (v/niceMax)*plotH;
+    svg.appendChild(el('line', {x1:leftPad, x2:leftPad+plotW, y1:y, y2:y, stroke:C.gridLine, 'stroke-width':1}));
+    svg.appendChild(el('text', {x:leftPad-6, y:y+3, 'text-anchor':'end', 'font-size':9.5, fill:C.grey}, valueFmt(v)));
   }
-  document.getElementById('pinCancel').addEventListener('click', ()=>{
-    pinOverlay.classList.remove('show');
-    pinCallback = null;
-    removeConfirmId = null;
-    renderTagGrid();
-  });
-  pinOverlay.addEventListener('click', (e)=>{ if(e.target===pinOverlay){ pinOverlay.classList.remove('show'); pinCallback=null; } });
-  document.getElementById('pinForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const val = document.getElementById('pinInput').value.trim();
-    if(val === MANAGER_PIN){
-      pinOverlay.classList.remove('show');
-      const cb = pinCallback; pinCallback = null;
-      if(cb) cb();
-    } else {
-      document.getElementById('pinError').classList.add('show');
-      document.getElementById('pinInput').value = '';
-      document.getElementById('pinInput').focus();
-    }
-  });
+  svg.appendChild(el('line', {x1:leftPad, x2:leftPad, y1:topPad, y2:topPad+plotH, stroke:C.line, 'stroke-width':1}));
 
-  // ===== events: edit / remove item (PIN protected) =====
-  document.getElementById('tagGrid').addEventListener('click', function(e){
-    const editBtn = e.target.closest('[data-edit]');
-    if(editBtn){
-      requestPin(()=> openEditModal(editBtn.dataset.edit), 'Edit');
-      return;
-    }
-    const btn = e.target.closest('[data-remove]');
-    if(!btn) return;
-    const id = btn.dataset.remove;
-    if(removeConfirmId===id){
-      requestPin(()=>{
-        state.items = state.items.filter(i=>i.id!==id);
-        state.transactions = state.transactions.filter(t=>t.itemId!==id);
-        removeConfirmId = null;
-        renderAll();
-        showToast('out', 'CUT DELETED');
-        syncDeleteItem(id);
-      }, 'Delete');
-    } else {
-      removeConfirmId = id;
-      renderTagGrid();
-      setTimeout(()=>{ if(removeConfirmId===id){ removeConfirmId=null; renderTagGrid(); } }, 3000);
-    }
-  });
+  const n = labels.length;
+  const bandW = plotW / n;
+  const barW = Math.min(bandW * 0.56, 52);
 
-  // ===== events: add / edit cut modal =====
-  const overlay = document.getElementById('modalOverlay');
-
-  function openAddModal(){
-    document.getElementById('addItemForm').reset();
-    document.getElementById('editItemId').value = '';
-    document.getElementById('modalTitle').textContent = 'Add new cut';
-    document.getElementById('modalSubmitBtn').textContent = 'Add cut';
-    document.getElementById('newStockLabel').textContent = 'Starting stock';
-    document.getElementById('newStock').value = 0;
-    document.getElementById('newReorder').value = 5;
-    overlay.classList.add('show');
-  }
-
-  function openEditModal(id){
-    const item = state.items.find(i=>i.id===id);
-    if(!item) return;
-    document.getElementById('editItemId').value = item.id;
-    document.getElementById('modalTitle').textContent = 'Edit cut';
-    document.getElementById('modalSubmitBtn').textContent = 'Save changes';
-    document.getElementById('newStockLabel').textContent = 'Current stock';
-    document.getElementById('newName').value = item.name;
-    document.getElementById('newCategory').value = item.category;
-    document.getElementById('newUnit').value = item.unit;
-    document.getElementById('newStock').value = item.stock;
-    document.getElementById('newReorder').value = item.reorder;
-    overlay.classList.add('show');
-  }
-
-  document.getElementById('openAddItem').addEventListener('click', openAddModal);
-  document.getElementById('cancelAddItem').addEventListener('click', ()=> overlay.classList.remove('show'));
-  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.classList.remove('show'); });
-
-  document.getElementById('addItemForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.getElementById('newName').value.trim();
-    if(!name) return;
-    const editId = document.getElementById('editItemId').value;
-    const category = document.getElementById('newCategory').value;
-    const unit = document.getElementById('newUnit').value;
-    const stock = parseFloat(document.getElementById('newStock').value)||0;
-    const reorder = parseFloat(document.getElementById('newReorder').value)||0;
-
-    if(editId){
-      const item = state.items.find(i=>i.id===editId);
-      if(item){
-        item.name = name; item.category = category; item.unit = unit;
-        item.stock = stock; item.reorder = reorder;
-        overlay.classList.remove('show');
-        renderAll();
-        showToast('in', 'CUT UPDATED · '+item.name);
-        syncUpdateItem(item);
-      }
-      return;
-    }
-
-    const item = { id: uid(), name, category, unit, stock, reorder };
-    state.items.push(item);
-    this.reset();
-    overlay.classList.remove('show');
-    renderAll();
-    showToast('in', 'NEW CUT ADDED · '+item.name);
-    syncAddItem(item);
-  });
-
-  // ===== CSV export =====
-  function toCSV(){
-    const rows = [['Date','Time','Reference #','Item','Category','Type','Quantity','Unit','Reason','Batch Code / Production Date','Stockman In-charge','Note']];
-    state.transactions.slice().sort((a,b)=>a.ts-b.ts).forEach(t=>{
-      const d = new Date(t.ts);
-      rows.push([
-        d.toLocaleDateString(), d.toLocaleTimeString(), t.ref||'',
-        t.itemName, CAT_LABEL[t.category]||t.category, t.type==='in'?'In':'Out',
-        t.qty, t.unit, t.reason, t.batch||'', t.stockman||'', t.note||''
-      ]);
-    });
-    return rows.map(r=>r.map(v=>{
-      const s = String(v).replace(/"/g,'""');
-      return /[",\n]/.test(s) ? '"'+s+'"' : s;
-    }).join(',')).join('\n');
-  }
-  document.getElementById('exportCsv').addEventListener('click', ()=>{
-    const csv = toCSV();
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'meat-ledger-activity-'+new Date().toISOString().slice(0,10)+'.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    showToast('in', 'CSV exported — ready to import into Google Sheets');
-  });
-
-  // ===== Google Sheet as live database =====
-  // Bound to: https://docs.google.com/spreadsheets/d/1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M/edit
-  // The sheet is the source of truth: cuts + activity are read from it on
-  // load, refreshed on a short interval, and every add/edit/delete/movement
-  // writes straight back to it. No toggle, no setup panel — this is always on.
-  //
-  // One-time setup (you do this once, in your Google account):
-  // 1. Open the sheet → Extensions → Apps Script.
-  // 2. Delete the placeholder code and paste in the script below.
-  // 3. Deploy → New deployment → Web app → Execute as: Me →
-  //    Who has access: Anyone → Deploy → copy the /exec URL.
-  // 4. Paste that URL into WEBAPP_URL right here, replacing the placeholder.
-  // The script auto-creates two tabs the first time it runs: "Items" and "Activity".
-  const SHEET_ID = '1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M';
-  const WEBAPP_URL = 'PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE';
-  const POLL_MS = 5000; // how often the dashboard re-checks the sheet ("real-time" here means a 5s refresh, not an instant push — Sheets has no live push channel)
-
-  /* ============ Apps Script — paste this whole block into Extensions → Apps Script ============
-
-  const SHEET_ID = '1079P0I4rPVycWaDbWUawSlHlRpKTr4vu9Ix26sbdh5M';
-  const ITEMS_TAB = 'Items';
-  const ACTIVITY_TAB = 'Activity';
-  const ITEM_COLS = ['id','name','category','unit','stock','reorder'];
-  const TX_COLS = ['id','ts','ref','itemId','itemName','category','type','qty','unit','reason','batch','stockman','note'];
-
-  function getSS(){ return SpreadsheetApp.openById(SHEET_ID); }
-
-  function getTab(name, headerCols){
-    var ss = getSS();
-    var sh = ss.getSheetByName(name);
-    if(!sh){ sh = ss.insertSheet(name); }
-    if(sh.getLastRow() === 0){ sh.appendRow(headerCols); }
-    return sh;
-  }
-  function itemsSheet(){ return getTab(ITEMS_TAB, ['ID','Name','Category','Unit','Stock','Reorder']); }
-  function activitySheet(){ return getTab(ACTIVITY_TAB, ['ID','Date','Reference #','Item ID','Item','Category','Type','Quantity','Unit','Reason','Batch Code / Production Date','Stockman In-charge','Note']); }
-
-  function rowsToObjects(sh, keys){
-    var data = sh.getDataRange().getValues();
-    var out = [];
-    for (var i = 1; i < data.length; i++){
-      var row = data[i];
-      if (!row[0]) continue;
-      var obj = {};
-      for (var k = 0; k < keys.length; k++){ obj[keys[k]] = row[k]; }
-      out.push(obj);
-    }
-    return out;
-  }
-
-  function findRowById(sh, id){
-    var data = sh.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++){ if (String(data[i][0]) === String(id)) return i + 1; }
-    return -1;
-  }
-
-  function doGet(e){
-    var items = rowsToObjects(itemsSheet(), ['id','name','category','unit','stock','reorder']);
-    var raw = rowsToObjects(activitySheet(), ['id','ts','ref','itemId','itemName','category','type','qty','unit','reason','batch','stockman','note']);
-    var transactions = raw.map(function(t){
-      var d = t.ts instanceof Date ? t.ts.getTime() : new Date(t.ts).getTime();
-      return Object.assign({}, t, { ts: d });
-    });
-    return out({ status:'ok', items: items, transactions: transactions });
-  }
-
-  function doPost(e){
-    var body = JSON.parse(e.postData.contents);
-    if (body.action === 'addItem')        return addItem(body.item);
-    if (body.action === 'updateItem')     return updateItem(body.item);
-    if (body.action === 'deleteItem')     return deleteItem(body.id);
-    if (body.action === 'addTransaction') return addTransaction(body.tx, body.newStock);
-    return out({ status:'error', message:'Unknown action' });
-  }
-
-  function addItem(item){
-    itemsSheet().appendRow([item.id, item.name, item.category, item.unit, item.stock, item.reorder]);
-    return out({ status:'ok' });
-  }
-  function updateItem(item){
-    var sh = itemsSheet();
-    var row = findRowById(sh, item.id);
-    if (row > 0) sh.getRange(row, 1, 1, 6).setValues([[item.id, item.name, item.category, item.unit, item.stock, item.reorder]]);
-    return out({ status:'ok' });
-  }
-  function deleteItem(id){
-    var sh = itemsSheet();
-    var row = findRowById(sh, id);
-    if (row > 0) sh.deleteRow(row);
-    return out({ status:'ok' });
-  }
-  function addTransaction(tx, newStock){
-    activitySheet().appendRow([tx.id, new Date(tx.ts), tx.ref, tx.itemId, tx.itemName, tx.category, tx.type, tx.qty, tx.unit, tx.reason, tx.batch, tx.stockman, tx.note || '']);
-    if (newStock !== undefined && tx.itemId){
-      var sh = itemsSheet();
-      var row = findRowById(sh, tx.itemId);
-      if (row > 0) sh.getRange(row, 5).setValue(newStock);
-    }
-    return out({ status:'ok' });
-  }
-  function out(obj){
-    return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-  }
-
-  ============ end Apps Script ============ */
-
-  function sheetConfigured(){ return WEBAPP_URL && WEBAPP_URL.indexOf('PASTE_YOUR') !== 0; }
-
-  function setSyncStatus(text, ok){
-    const el = document.getElementById('syncStatus');
-    el.textContent = text;
-    el.className = 'sync-status ' + (ok ? 'on' : 'off');
-  }
-
-  // ----- read: pull items + transactions from the sheet -----
-  let firstLoadDone = false;
-  function loadFromSheet(){
-    if(!sheetConfigured()){
-      setSyncStatus('Google Sheet database not connected — add the Web App URL in the code (showing local demo data).', false);
-      return;
-    }
-    fetch(WEBAPP_URL + '?action=getAll', { method:'GET' })
-      .then(r=>r.json())
-      .then(data=>{
-        if(data && data.status==='ok'){
-          state.items = (data.items||[]).map(i=>({
-            id: String(i.id), name: i.name, category: i.category, unit: i.unit,
-            stock: Number(i.stock)||0, reorder: Number(i.reorder)||0
-          }));
-          state.transactions = (data.transactions||[]).map(t=>({
-            id: String(t.id), itemId: String(t.itemId), itemName: t.itemName, category: t.category,
-            unit: t.unit, type: t.type, qty: Number(t.qty)||0, ref: t.ref, reason: t.reason,
-            batch: t.batch, stockman: t.stockman, note: t.note||'', ts: Number(t.ts)||Date.now()
-          })).sort((a,b)=>b.ts-a.ts);
-          renderAll();
-          setSyncStatus('Live · synced from Google Sheet · '+new Date().toLocaleTimeString(), true);
-        } else {
-          setSyncStatus('Google Sheet returned an unexpected response — check the Apps Script deployment.', false);
-        }
-        firstLoadDone = true;
-      })
-      .catch(()=>{
-        setSyncStatus('Could not reach the Google Sheet — check the deployment URL and access settings.', false);
-        firstLoadDone = true;
+  labels.forEach((lab, i) => {
+    const cx = leftPad + bandW*i + bandW/2;
+    const dim = highlightIndex !== null && highlightIndex !== i;
+    let yCum = topPad + plotH;
+    series.forEach(ser => {
+      const v = ser.data[i] || 0;
+      if (v <= 0) return;
+      const segH = (v/niceMax)*plotH;
+      const y = yCum - segH;
+      const rect = el('rect', {x:cx-barW/2, y, width:barW, height:Math.max(segH,0.5), fill:ser.color, rx:2, opacity: dim?0.35:1});
+      rect.addEventListener('mousemove', (e)=>{
+        showTip(e, `<div class="tt-title">${lab}</div><div class="tt-row"><span class="tt-swatch" style="background:${ser.color}"></span>${ser.label}: <strong>${valueFmt(v,true)}</strong></div>`);
       });
+      rect.addEventListener('mouseleave', hideTip);
+      svg.appendChild(rect);
+      yCum -= segH;
+    });
+    svg.appendChild(el('text', {x:cx, y:topPad+plotH+16, 'text-anchor':'middle', 'font-size':10.5, fill: highlightIndex===i?C.ink:C.grey, 'font-weight': highlightIndex===i?'700':'400'}, lab));
+  });
+
+  if (legend && series.length > 1){
+    const legY = topPad + plotH + 34;
+    const items = [];
+    series.forEach(ser=>{
+      const label = isNarrow && ser.label.length > 16 ? ser.label.slice(0,14)+'…' : ser.label;
+      items.push({label, color:ser.color, w: 14 + label.length*5.6 + 14});
+    });
+    let rowY = legY, rowX = leftPad;
+    const maxX = leftPad + plotW;
+    items.forEach(it=>{
+      if (rowX + it.w > maxX + 4){ rowX = leftPad; rowY += 16; }
+      svg.appendChild(el('rect', {x:rowX, y:rowY-8, width:9, height:9, rx:2, fill:it.color}));
+      svg.appendChild(el('text', {x:rowX+14, y:rowY, 'font-size':10.5, fill:C.grey}, it.label));
+      rowX += it.w;
+    });
+  }
+}
+
+/* ---- line / area chart (multi-series), with per-series opacity + optional highlighted x-index ---- */
+function drawLineChart(containerId, {labels, series, valueFmt, area=false, legend=true, highlightIndex=null}){
+  const {svg, W, H} = initSvg(containerId);
+  const isNarrow = W < 380;
+  const leftPad = 48;
+  const rightPad = 12;
+  const topPad = 14;
+  const legendH = legend && series.length > 1 ? (isNarrow ? 34 : 22) : 0;
+  const bottomPad = 24 + legendH;
+
+  const plotW = W - leftPad - rightPad;
+  const plotH = H - topPad - bottomPad;
+  if (plotW <= 0 || plotH <= 0) return;
+
+  const allVals = series.flatMap(s => s.data.filter(v => v !== null && v !== undefined));
+  let minVal = Math.min(0, ...allVals);
+  let maxVal = Math.max(...allVals, 0);
+  if (minVal === maxVal){ maxVal = minVal + 1; }
+  const {niceMax} = niceStep(maxVal);
+  const niceMin = minVal < 0 ? -niceStep(-minVal).niceMax : 0;
+  const range = niceMax - niceMin || 1;
+
+  const steps = 4;
+  for (let i=0; i<=steps; i++){
+    const v = niceMin + (range*i/steps);
+    const y = topPad + plotH - ((v-niceMin)/range)*plotH;
+    svg.appendChild(el('line', {x1:leftPad, x2:leftPad+plotW, y1:y, y2:y, stroke:C.gridLine, 'stroke-width':1}));
+    svg.appendChild(el('text', {x:leftPad-6, y:y+3, 'text-anchor':'end', 'font-size':9.5, fill:C.grey}, valueFmt(v)));
+  }
+  svg.appendChild(el('line', {x1:leftPad, x2:leftPad, y1:topPad, y2:topPad+plotH, stroke:C.line, 'stroke-width':1}));
+  if (niceMin < 0){
+    const zy = topPad + plotH - ((0-niceMin)/range)*plotH;
+    svg.appendChild(el('line', {x1:leftPad, x2:leftPad+plotW, y1:zy, y2:zy, stroke:C.line, 'stroke-width':1}));
   }
 
-  // ----- write: push a change, then re-pull so the sheet stays the single source of truth -----
-  function sheetPost(payload){
-    if(!sheetConfigured()) return;
-    fetch(WEBAPP_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    }).then(()=>{ loadFromSheet(); })
-      .catch(()=>{ showToast('out', 'Could not reach Google Sheet — check the sync connection'); });
+  const n = labels.length;
+  const stepX = n > 1 ? plotW/(n-1) : 0;
+  const xAt = i => leftPad + stepX*i;
+  const yAt = v => topPad + plotH - ((v-niceMin)/range)*plotH;
+
+  if (highlightIndex !== null){
+    svg.appendChild(el('line', {x1:xAt(highlightIndex), x2:xAt(highlightIndex), y1:topPad, y2:topPad+plotH, stroke:C.olive, 'stroke-width':1.5, 'stroke-dasharray':'3,3', opacity:0.55}));
   }
 
-  function syncAddItem(item){ sheetPost({ action:'addItem', item }); }
-  function syncUpdateItem(item){ sheetPost({ action:'updateItem', item }); }
-  function syncDeleteItem(id){ sheetPost({ action:'deleteItem', id }); }
-  function syncAddTransaction(tx, newStock){ sheetPost({ action:'addTransaction', tx, newStock }); }
+  const labelEvery = isNarrow ? Math.ceil(n/6) : Math.ceil(n/12);
+  labels.forEach((lab,i)=>{
+    if (i % labelEvery !== 0 && i !== n-1) return;
+    svg.appendChild(el('text', {x:xAt(i), y:topPad+plotH+16, 'text-anchor':'middle', 'font-size':9.5, fill: highlightIndex===i?C.ink:C.grey, 'font-weight': highlightIndex===i?'700':'400'}, lab));
+  });
 
-  if(sheetConfigured()){
-    loadFromSheet();
-    setInterval(loadFromSheet, POLL_MS);
-  } else {
-    setSyncStatus('Google Sheet database not connected — add the Web App URL in the code (showing local demo data).', false);
+  series.forEach(ser=>{
+    const opacity = ser.opacity !== undefined ? ser.opacity : 1;
+    const pts = ser.data.map((v,i)=> v===null||v===undefined ? null : [xAt(i), yAt(v)]);
+    const validSegs = [];
+    let seg = [];
+    pts.forEach(p=>{ if(p){ seg.push(p); } else if(seg.length){ validSegs.push(seg); seg=[]; } });
+    if (seg.length) validSegs.push(seg);
+
+    validSegs.forEach(segPts=>{
+      if (area && segPts.length>1){
+        const baseY = yAt(Math.max(niceMin,0));
+        let d = `M ${segPts[0][0]} ${baseY} `;
+        segPts.forEach(p=> d += `L ${p[0]} ${p[1]} `);
+        d += `L ${segPts[segPts.length-1][0]} ${baseY} Z`;
+        svg.appendChild(el('path', {d, fill:ser.color, opacity:0.13*opacity}));
+      }
+      let d = '';
+      segPts.forEach((p,i)=> d += (i===0?'M':'L') + ` ${p[0]} ${p[1]} `);
+      svg.appendChild(el('path', {d, fill:'none', stroke:ser.color, 'stroke-width':ser.bold?3:1.75, 'stroke-linejoin':'round', 'stroke-linecap':'round', opacity}));
+    });
+
+    ser.data.forEach((v,i)=>{
+      if (v===null||v===undefined) return;
+      const r = ser.showPoints===false ? (ser.bold?2.5:0) : (ser.bold?3.5:2);
+      if (r<=0) return;
+      const c = el('circle', {cx:xAt(i), cy:yAt(v), r, fill:ser.color, stroke:'#fff', 'stroke-width':1, opacity});
+      c.addEventListener('mousemove', (e)=>{
+        showTip(e, `<div class="tt-title">${labels[i]}</div><div class="tt-row"><span class="tt-swatch" style="background:${ser.color}"></span>${ser.label}: <strong>${valueFmt(v,true)}</strong></div>`);
+      });
+      c.addEventListener('mouseleave', hideTip);
+      svg.appendChild(c);
+    });
+  });
+
+  if (legend && series.length > 1){
+    const legY = topPad + plotH + 34;
+    let rowY = legY, rowX = leftPad;
+    const maxX = leftPad + plotW;
+    series.forEach(ser=>{
+      const label = isNarrow && ser.label.length > 12 ? ser.label.slice(0,10)+'…' : ser.label;
+      const w = 22 + label.length*5.6 + 10;
+      if (rowX + w > maxX + 4){ rowX = leftPad; rowY += 16; }
+      svg.appendChild(el('line', {x1:rowX, x2:rowX+14, y1:rowY-3, y2:rowY-3, stroke:ser.color, 'stroke-width':ser.bold?3:1.75, opacity: ser.opacity!==undefined?ser.opacity:1}));
+      svg.appendChild(el('text', {x:rowX+19, y:rowY, 'font-size':10.5, fill:C.grey}, label));
+      rowX += w;
+    });
+  }
+}
+
+/* ---- horizontal ranking bar chart ---- */
+function drawHBarChart(containerId, {labels, values, color, valueFmt}){
+  const {svg, W, H} = initSvg(containerId);
+  const isNarrow = W < 380;
+  const leftPad = Math.max(85, Math.min(W*0.42, isNarrow ? 132 : 190));
+  const rightPad = 10;
+  const topPad = 8;
+  const bottomPad = 8;
+  const plotW = W - leftPad - rightPad;
+  const plotH = H - topPad - bottomPad;
+  if (plotW <= 0 || plotH <= 0) return;
+
+  if (!labels.length){
+    svg.appendChild(el('text', {x:W/2, y:H/2, 'text-anchor':'middle', 'font-size':12, fill:C.greySoft}, 'No data for this selection'));
+    return;
   }
 
-  // ===== clock =====
-  function tickClock(){
-    const now = new Date();
-    const opts = { weekday:'short', month:'short', day:'numeric' };
-    document.getElementById('clock').textContent = now.toLocaleDateString(undefined,opts)+' · '+now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
-  }
-  tickClock();
-  setInterval(tickClock, 30000);
+  const maxVal = Math.max(...values, 1);
+  const n = labels.length;
+  const rowH = plotH / n;
+  const barH = Math.min(rowH*0.62, 26);
 
-  renderAll();
+  // Estimate max characters that fit the left label column at font-size 10 (Georgia serif ~5.9px/char)
+  const charW = 5.9;
+  const maxChars = Math.max(9, Math.floor((leftPad - 14) / charW));
+
+  labels.forEach((lab,i)=>{
+    const cy = topPad + rowH*i + rowH/2;
+    const v = values[i];
+    const barLen = (v/maxVal) * plotW;
+    const lbl = lab.length > maxChars ? lab.slice(0, maxChars-1)+'…' : lab;
+    const textEl = el('text', {x:leftPad-8, y:cy+3.5, 'text-anchor':'end', 'font-size':10, fill:C.ink}, lbl);
+    if (lbl !== lab){
+      const titleEl = document.createElementNS(SVGNS, 'title');
+      titleEl.textContent = lab;
+      textEl.appendChild(titleEl);
+    }
+    svg.appendChild(textEl);
+    const rect = el('rect', {x:leftPad, y:cy-barH/2, width:Math.max(barLen,1), height:barH, fill:color, rx:2});
+    rect.addEventListener('mousemove', (e)=>{
+      showTip(e, `<div class="tt-title">${lab}</div><div>${valueFmt(v,true)}</div>`);
+    });
+    rect.addEventListener('mouseleave', hideTip);
+    svg.appendChild(rect);
+    const showInside = barLen > 46;
+    svg.appendChild(el('text', {
+      x: showInside ? leftPad+barLen-6 : Math.min(leftPad+barLen+6, W-4),
+      y: cy+3.5,
+      'text-anchor': showInside ? 'end' : 'start',
+      'font-size':10, fill: showInside ? '#fff8f0' : C.grey,
+      class:'num-font'
+    }, valueFmt(v, true)));
+  });
+}
+
+/* ---------------- resize handling ---------------- */
+let resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ CHART_REGISTRY.forEach(fn=>fn()); }, 180);
+});
+
+/* ======================================================================
+   TIER 1 — OVERVIEW
+   ====================================================================== */
+(function(){
+  const o = DATA.overall;
+  const years = o.years;
+  const lastIdx = years.length - 1;
+
+  document.getElementById('hdr-sub').textContent = `Overview · Main Products · MCP & By-Products · Customers — ${years[0]}–${years[lastIdx]}`;
+
+  const PRODUCT_ARR = {
+    ALL: {label:'All Products', peso:o.total_peso},
+    live: {label:'Live Hogs', peso:o.live_peso, heads:o.live_heads},
+    eggs: {label:'Hatching Eggs', peso:o.eggs_peso, pcs:o.eggs_pcs},
+    cattle: {label:'Cattle', peso:o.cattle_peso, heads:o.cattle_heads},
+  };
+
+  let yearFilter = 'ALL';
+  let productFilter = 'ALL';
+
+  makePills('t1-year-pills', [{value:'ALL', label:'All Years'}, ...years.map(y=>({value:String(y), label:String(y)}))], yearFilter, (v)=>{ yearFilter=v; render(); });
+  makePills('t1-product-pills', Object.keys(PRODUCT_ARR).map(k=>({value:k, label:PRODUCT_ARR[k].label})), productFilter, (v)=>{ productFilter=v; render(); });
+
+  function render(){
+    const prod = PRODUCT_ARR[productFilter];
+    const arr = prod.peso;
+    const yIdx = yearFilter === 'ALL' ? lastIdx : years.indexOf(Number(yearFilter));
+    const yLabel = years[yIdx];
+    const val = arr[yIdx];
+    const prevVal = yIdx > 0 ? arr[yIdx-1] : null;
+    const growth = prevVal ? (val-prevVal)/prevVal*100 : null;
+    const allTime = arr.reduce((a,b)=>a+b,0);
+    const prodTag = productFilter==='ALL' ? '' : prod.label + ' ';
+
+    let qtyVal, qtyLabel;
+    if (productFilter === 'ALL'){
+      qtyVal = o.live_heads[yIdx] + o.cattle_heads[yIdx];
+      qtyLabel = `${yLabel} Livestock Sold`;
+    } else if (productFilter === 'eggs'){
+      qtyVal = o.eggs_pcs[yIdx];
+      qtyLabel = `${yLabel} Eggs Sold (pcs)`;
+    } else {
+      qtyVal = prod.heads[yIdx];
+      qtyLabel = `${yLabel} ${prod.label} Sold (hd)`;
+    }
+
+    let kpi4Label, kpi4Val, kpi4Delta, kpi4Dir='flat';
+    if (productFilter === 'ALL'){
+      const eggsGrowth = ((o.eggs_pcs[yIdx]-(o.eggs_pcs[yIdx-1]||0))/(o.eggs_pcs[yIdx-1]||1)*100);
+      kpi4Label = `${yLabel} Hatching Eggs`;
+      kpi4Val = NUM(o.eggs_pcs[yIdx], {compact:true}) + ' pcs';
+      kpi4Delta = PCT(yIdx>0?eggsGrowth:null); kpi4Dir = eggsGrowth>=0?'up':'down';
+    } else {
+      const rateKey = productFilter;
+      const rateBlock = (DATA.products[rateKey]||{}).rate || {};
+      const rateVals = (rateBlock[yLabel]||[]).filter(v=>v);
+      const avgRate = rateVals.length ? rateVals.reduce((a,b)=>a+b,0)/rateVals.length : null;
+      const prevVals = yIdx>0 ? (rateBlock[years[yIdx-1]]||[]).filter(v=>v) : [];
+      const prevAvg = prevVals.length ? prevVals.reduce((a,b)=>a+b,0)/prevVals.length : null;
+      const rGrowth = prevAvg ? (avgRate-prevAvg)/prevAvg*100 : null;
+      kpi4Label = `${yLabel} Avg. Rate`;
+      kpi4Val = avgRate ? ('₱'+avgRate.toFixed(2)) : '—';
+      kpi4Delta = PCT(rGrowth); kpi4Dir = (rGrowth||0)>=0?'up':'down';
+    }
+
+    const bestYearIdx = arr.indexOf(Math.max(...arr));
+
+    const kpis = [
+      {lbl:`${prodTag}All-Time Total (${years[0]}–${years[lastIdx]})`, val:PHP(allTime, {compact:true}), delta:`${years.length} years tracked`, dir:'flat', border:C.olive},
+      {lbl:`Strongest Year (${prodTag||'Total'})`, val:String(years[bestYearIdx]), delta:PHP(arr[bestYearIdx],{compact:true}), dir:'flat', border:C.oliveDeep},
+      {lbl:`${yLabel} ${prodTag}Sales`, val:PHP(val, {compact:true}), delta:PCT(growth), dir: (growth||0)>=0?'up':'down', border:C.oliveDark},
+      {lbl:qtyLabel, val:NUM(qtyVal,{compact:true}) + (productFilter==='eggs'?'':' hd'), delta:'', dir:'flat', border:C.ink},
+      {lbl:kpi4Label, val:kpi4Val, delta:kpi4Delta, dir:kpi4Dir, border:C.inkSoft},
+    ];
+    document.getElementById('p1-kpis').innerHTML = kpis.map(k=>`
+      <div class="card kpi" style="border-top:3px solid ${k.border};">
+        <div class="lbl">${k.lbl}</div>
+        <div class="val num-font">${k.val}</div>
+        <div class="delta ${k.dir}">${k.delta ? (k.dir==='up'?'▲ ':k.dir==='down'?'▼ ':'· ') + k.delta : ''}</div>
+      </div>`).join('');
+
+    const hIdx = yearFilter==='ALL' ? null : yIdx;
+
+    document.getElementById('t1-chart1-title').textContent = productFilter==='ALL' ? 'Total sales by year' : `${prod.label} sales by year`;
+    document.getElementById('t1-chart1-cap').textContent = (productFilter==='ALL' ? 'Stacked by product line, in PHP' : 'In PHP') + (hIdx!==null ? ` — ${yLabel} highlighted` : '');
+
+    if (productFilter === 'ALL'){
+      drawBarChart('chart-overall-stack', {
+        labels: years,
+        series: [
+          {label:'Live Hogs', color:C.oliveDark, data:o.live_peso},
+          {label:'Hatching Eggs', color:C.olive, data:o.eggs_peso},
+          {label:'Cattle', color:C.inkSoft, data:o.cattle_peso},
+        ],
+        valueFmt: (v,full)=> full ? PHP(v) : PHP(v,{compact:true}),
+        highlightIndex: hIdx
+      });
+    } else {
+      drawBarChart('chart-overall-stack', {
+        labels: years,
+        series: [{label:prod.label, color:C.oliveDark, data:arr}],
+        valueFmt: (v,full)=> full ? PHP(v) : PHP(v,{compact:true}),
+        legend:false, highlightIndex: hIdx
+      });
+    }
+
+    const growthArr = arr.map((v,i)=> i===0 ? null : (arr[i-1] ? (v-arr[i-1])/arr[i-1]*100 : null));
+    document.getElementById('t1-chart2-title').textContent = productFilter==='ALL' ? 'Year‑over‑year growth' : `${prod.label} YoY growth`;
+    document.getElementById('t1-chart2-cap').textContent = '% change in sales value' + (hIdx!==null ? ` — ${yLabel} highlighted` : '');
+    drawLineChart('chart-yoy-growth', {
+      labels: years,
+      series: [{label:'YoY growth', color:C.oliveDark, bold:true, data:growthArr}],
+      valueFmt:(v,full)=> (v>0&&full?'+':'') + v.toFixed(1) + '%',
+      area:true, legend:false, highlightIndex: hIdx
+    });
+
+    let rows = '<thead><tr><th>Year</th><th class="r">Hogs (hd)</th><th class="r">Hogs (₱)</th>' +
+      '<th class="r">Eggs (pcs)</th><th class="r">Eggs (₱)</th>' +
+      '<th class="r">Cattle (hd)</th><th class="r">Cattle (₱)</th>' +
+      '<th class="r">Total (₱)</th><th class="r">YoY</th></tr></thead><tbody>';
+    years.forEach((y,i)=>{
+      const rowHi = hIdx===i ? `style="background:${C.hoverTan};"` : '';
+      rows += `<tr ${rowHi}>
+        <td>${y}</td>
+        <td class="r num-font">${NUM(o.live_heads[i])}</td>
+        <td class="r num-font">${PHP(o.live_peso[i])}</td>
+        <td class="r num-font">${NUM(o.eggs_pcs[i])}</td>
+        <td class="r num-font">${PHP(o.eggs_peso[i])}</td>
+        <td class="r num-font">${NUM(o.cattle_heads[i])}</td>
+        <td class="r num-font">${PHP(o.cattle_peso[i])}</td>
+        <td class="r num-font" style="font-weight:700;">${PHP(o.total_peso[i])}</td>
+        <td class="r num-font" style="color:${o.yoy_growth[i]==null?C.greySoft:(o.yoy_growth[i]>=0?C.oliveDark:C.rust)}">${PCT(o.yoy_growth[i])}</td>
+      </tr>`;
+    });
+    rows += '</tbody>';
+    document.getElementById('p1-table').innerHTML = rows;
+  }
+
+  registerChart(render);
+})();
+
+/* ======================================================================
+   TIER 2 — MAIN PRODUCTS
+   ====================================================================== */
+(function(){
+  const products = DATA.products;
+  const months = DATA.months;
+  const keys = Object.keys(products);
+  let currentProduct = 'live';
+  let currentYear = 'ALL';
+
+  makePills('p2-pills', keys.map(k=>({value:k, label:products[k].label})), currentProduct, (v)=>{ currentProduct=v; refreshYearPills(); render(); });
+
+  function refreshYearPills(){
+    const p = products[currentProduct];
+    const yrs = Object.keys(primaryQtyBlock(p)).map(Number).sort((a,b)=>a-b);
+    if (!yrs.includes(Number(currentYear))) currentYear = 'ALL';
+    makePills('p2-year-pills', [{value:'ALL', label:'All Years'}, ...yrs.map(y=>({value:String(y), label:String(y)}))], currentYear, (v)=>{ currentYear=v; render(); });
+  }
+
+  function primaryQtyBlock(p){ return p.heads || p.pcs; }
+
+  function render(){
+    const p = products[currentProduct];
+    const qtyBlock = primaryQtyBlock(p);
+    const years = Object.keys(qtyBlock).map(Number).sort((a,b)=>a-b);
+    const focusY = currentYear === 'ALL' ? years[years.length-1] : Number(currentYear);
+    const focusIdx = years.indexOf(focusY);
+    const prevY = focusIdx>0 ? years[focusIdx-1] : null;
+
+    const focusQtyTotal = qtyBlock[focusY].reduce((a,b)=>a+b,0);
+    const prevQtyTotal = prevY!=null ? qtyBlock[prevY].reduce((a,b)=>a+b,0) : null;
+    const qtyGrowth = prevQtyTotal ? ((focusQtyTotal-prevQtyTotal)/prevQtyTotal*100) : null;
+
+    const pesoBlock = p.peso;
+    const focusPesoTotal = pesoBlock[focusY].reduce((a,b)=>a+b,0);
+    const prevPesoTotal = prevY!=null ? pesoBlock[prevY].reduce((a,b)=>a+b,0) : null;
+    const pesoGrowth = prevPesoTotal ? ((focusPesoTotal-prevPesoTotal)/prevPesoTotal*100) : null;
+
+    const rateBlock = p.rate || {};
+    const rateVals = (rateBlock[focusY]||[]).filter(v=>v);
+    const avgRate = rateVals.length ? rateVals.reduce((a,b)=>a+b,0)/rateVals.length : null;
+    const prevRateVals = prevY!=null ? (rateBlock[prevY]||[]).filter(v=>v) : [];
+    const prevAvgRate = prevRateVals.length ? prevRateVals.reduce((a,b)=>a+b,0)/prevRateVals.length : null;
+    const rateGrowth = prevAvgRate ? ((avgRate-prevAvgRate)/prevAvgRate*100) : null;
+
+    const peakMonthIdx = qtyBlock[focusY].indexOf(Math.max(...qtyBlock[focusY]));
+
+    document.getElementById('p2-kpis').innerHTML = `
+      <div class="card kpi" style="border-top:3px solid ${C.oliveDark};"><div class="lbl">${focusY} Volume (${p.unit})</div><div class="val num-font">${NUM(focusQtyTotal, {compact:true})}</div>
+        <div class="delta ${qtyGrowth>=0?'up':'down'}">${qtyGrowth==null?'· first year on record':(qtyGrowth>=0?'▲ ':'▼ ')+PCT(qtyGrowth)+' vs '+prevY}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.olive};"><div class="lbl">${focusY} Sales Value</div><div class="val num-font">${PHP(focusPesoTotal,{compact:true})}</div>
+        <div class="delta ${pesoGrowth>=0?'up':'down'}">${pesoGrowth==null?'· first year on record':(pesoGrowth>=0?'▲ ':'▼ ')+PCT(pesoGrowth)+' vs '+prevY}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.ink};"><div class="lbl">${focusY} Avg. Rate</div><div class="val num-font">${avgRate?('₱'+avgRate.toFixed(2)):'—'}</div>
+        <div class="delta ${rateGrowth>=0?'up':'down'}">${rateGrowth==null?'· n/a':(rateGrowth>=0?'▲ ':'▼ ')+PCT(rateGrowth)+' vs '+prevY}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.inkSoft};"><div class="lbl">Peak Month, ${focusY}</div><div class="val num-font">${months[peakMonthIdx]}</div>
+        <div class="delta">· ${NUM(qtyBlock[focusY][peakMonthIdx],{compact:true})} ${p.unit.toLowerCase()}</div></div>
+    `;
+
+    document.getElementById('p2-chart1-title').textContent = `Monthly ${p.unit.toLowerCase()} by year`;
+    document.getElementById('p2-chart1-cap').textContent = `${p.label} — overlaid across ${years[0]}–${years[years.length-1]}` + (currentYear!=='ALL' ? ` (${focusY} bold)` : '');
+    document.getElementById('p2-rate-cap').textContent = `${p.label} — monthly average price (PHP)` + (currentYear!=='ALL' ? `, ${focusY} bold` : ', overlaid by year');
+
+    const monthlySeries = years.map((y,i)=>({
+      label:String(y), color: YEAR_PALETTE[i % YEAR_PALETTE.length],
+      bold: y===focusY, opacity: (currentYear!=='ALL' && y!==focusY) ? 0.28 : 1,
+      data: qtyBlock[y]
+    }));
+    drawLineChart('chart-product-monthly', {
+      labels: months, series: monthlySeries,
+      valueFmt:(v,full)=> full? NUM(v) : NUM(v,{compact:true}), legend:true
+    });
+
+    const annualPeso = years.map(y => pesoBlock[y].reduce((a,b)=>a+b,0));
+    drawBarChart('chart-product-annual', {
+      labels: years,
+      series: [{label:'Sales value', color:C.oliveDark, data:annualPeso}],
+      valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true}), legend:false,
+      highlightIndex: focusIdx
+    });
+
+    const rateMonthlySeries = years.map((y,i)=>({
+      label:String(y), color: YEAR_PALETTE[i % YEAR_PALETTE.length],
+      bold: y===focusY, opacity: (currentYear!=='ALL' && y!==focusY) ? 0.28 : 1,
+      showPoints: false,
+      data: (rateBlock[y]||months.map(()=>0)).map(v=> v ? v : null)
+    }));
+    drawLineChart('chart-product-rate', {
+      labels: months, series: rateMonthlySeries,
+      valueFmt:(v,full)=> '₱'+v.toFixed(full?2:0), legend:true
+    });
+
+    const maxVal = Math.max(...years.flatMap(y=>qtyBlock[y]));
+    let html = '<table class="heat-table"><thead><tr><th></th>' + months.map(m=>`<th>${m}</th>`).join('') + '</tr></thead><tbody>';
+    years.forEach(y=>{
+      html += `<tr><th style="text-align:right; padding-right:6px; color:${y===focusY?C.ink:C.grey}; font-weight:${y===focusY?'700':'400'};">${y}</th>`;
+      qtyBlock[y].forEach((v,mi)=>{
+        const t = maxVal ? v/maxVal : 0;
+        const bg = t===0 ? '#f2f2f2' : `rgba(92,128,0,${0.10+t*0.75})`;
+        const txt = t>0.5 ? '#fff8f0' : C.grey;
+        const ring = y===focusY ? `box-shadow:inset 0 0 0 1px ${C.oliveDark};` : '';
+        html += `<td><div class="heat-cell" style="background:${bg}; color:${txt}; ${ring}" title="${y} — ${months[mi]}: ${NUM(v)}">${NUM(v,{compact:true})}</div></td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('p2-heatmap').innerHTML = html;
+  }
+
+  refreshYearPills();
+  registerChart(render);
+})();
+
+/* ======================================================================
+   TIER 3 — MCP & BY-PRODUCTS
+   ====================================================================== */
+(function(){
+  const groups = DATA.mcp_others;
+  const groupNames = Object.keys(groups);
+  const allYears = [2020,2021,2022,2023];
+
+  let yearFilter = 'ALL';
+  let catFilter = 'ALL';
+
+  makePills('p3-year-pills', [{value:'ALL', label:'All Years'}, ...allYears.map(y=>({value:String(y), label:String(y)}))], yearFilter, (v)=>{ yearFilter=v; render(); });
+  makePills('p3-cat-pills', [{value:'ALL', label:'All Categories'}, ...groupNames.map(g=>({value:g, label:g}))], catFilter, (v)=>{ catFilter=v; render(); });
+
+  function scopeYears(){ return yearFilter==='ALL' ? allYears : [Number(yearFilter)]; }
+  function itemTotal(item, yrs){ return yrs.reduce((s,y)=> s+(item['amt_'+y]||0), 0); }
+  function groupTotalForYears(g, yrs){ return groups[g].reduce((s,item)=> s+itemTotal(item,yrs), 0); }
+
+  function render(){
+    const yrs = scopeYears();
+    const scopedGroups = catFilter==='ALL' ? groupNames : [catFilter];
+
+    const grandTotal = scopedGroups.reduce((s,g)=> s+groupTotalForYears(g,yrs), 0);
+
+    const focusYear = yearFilter==='ALL' ? allYears[allYears.length-1] : Number(yearFilter);
+    const prevYear = focusYear - 1;
+    const havePrev = prevYear >= allYears[0];
+    const focusTotal = scopedGroups.reduce((s,g)=> s+groupTotalForYears(g,[focusYear]), 0);
+    const prevTotal = havePrev ? scopedGroups.reduce((s,g)=> s+groupTotalForYears(g,[prevYear]), 0) : null;
+    const growth = (havePrev && prevTotal) ? (focusTotal-prevTotal)/prevTotal*100 : null;
+
+    let kpi3Label, kpi3Val, kpi3Sub;
+    if (catFilter === 'ALL'){
+      const groupFinal = groupNames.map(g=>groupTotalForYears(g,yrs));
+      const topIdx = groupFinal.indexOf(Math.max(...groupFinal));
+      kpi3Label = 'Leading Category'; kpi3Val = groupNames[topIdx]; kpi3Sub = PHP(groupFinal[topIdx],{compact:true});
+    } else {
+      let items = groups[catFilter].map(item=>({name:item.name, total:itemTotal(item,yrs)})).filter(i=>i.total>0);
+      items.sort((a,b)=>b.total-a.total);
+      kpi3Label = 'Leading Item'; kpi3Val = items[0] ? items[0].name : '—'; kpi3Sub = items[0] ? PHP(items[0].total,{compact:true}) : '—';
+    }
+
+    let allItems = [];
+    scopedGroups.forEach(g=>{
+      groups[g].forEach(item=>{
+        const total = itemTotal(item, yrs);
+        if (total > 0) allItems.push({name:item.name, group:g, total});
+      });
+    });
+    const activeLineItems = allItems.length;
+
+    const yearRangeLabel = yearFilter==='ALL' ? `${allYears[0]}–${allYears[allYears.length-1]}` : String(focusYear);
+    const catLabel = catFilter==='ALL' ? 'All Categories' : catFilter;
+
+    document.getElementById('p3-kpis').innerHTML = `
+      <div class="card kpi" style="border-top:3px solid ${C.olive};"><div class="lbl">${catLabel} Total, ${yearRangeLabel}</div><div class="val num-font">${PHP(grandTotal,{compact:true})}</div><div class="delta">· ${scopedGroups.length} categor${scopedGroups.length===1?'y':'ies'}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.oliveDark};"><div class="lbl">${focusYear} Total</div><div class="val num-font">${PHP(focusTotal,{compact:true})}</div><div class="delta ${growth>=0?'up':'down'}">${growth==null?'· first year on record':(growth>=0?'▲ ':'▼ ')+PCT(growth)+' vs '+prevYear}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.ink};"><div class="lbl">${kpi3Label}</div><div class="val" style="font-size:15px;">${kpi3Val}</div><div class="delta">· ${kpi3Sub}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.inkSoft};"><div class="lbl">Active Line Items</div><div class="val num-font">${activeLineItems}</div><div class="delta">· in current selection</div></div>
+    `;
+
+    const hIdx = yearFilter==='ALL' ? null : allYears.indexOf(Number(yearFilter));
+
+    document.getElementById('p3-chart1-title').textContent = catFilter==='ALL' ? 'Sales by category' : `${catFilter} — sales by year`;
+    document.getElementById('p3-chart1-cap').textContent = 'Total PHP per year' + (catFilter==='ALL' ? ', by group' : '');
+    if (catFilter === 'ALL'){
+      drawBarChart('chart-mcp-groups', {
+        labels: allYears,
+        series: groupNames.map((g,i)=>({label:g, color: CAT_PALETTE[i%CAT_PALETTE.length], data: allYears.map(y=>groupTotalForYears(g,[y]))})),
+        valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true}),
+        highlightIndex: hIdx
+      });
+    } else {
+      drawBarChart('chart-mcp-groups', {
+        labels: allYears,
+        series: [{label:catFilter, color:C.oliveDark, data: allYears.map(y=>groupTotalForYears(catFilter,[y]))}],
+        valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true}),
+        legend:false, highlightIndex: hIdx
+      });
+    }
+
+    allItems.sort((a,b)=>b.total-a.total);
+    const topItems = allItems.slice(0,10);
+    document.getElementById('p3-chart2-title').textContent = 'Top contributing line items';
+    document.getElementById('p3-chart2-cap').textContent = `Ranked by total ${yearRangeLabel} sales value${catFilter!=='ALL' ? ' — '+catFilter : ''}`;
+    drawHBarChart('chart-mcp-top', {
+      labels: topItems.map(i=>i.name),
+      values: topItems.map(i=>i.total),
+      color: C.oliveDark,
+      valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true})
+    });
+
+    let html = '';
+    scopedGroups.forEach(g=>{
+      const items = groups[g].filter(item => allYears.some(y=>item['amt_'+y] > 0) );
+      if (!items.length) return;
+      html += `<div class="subsection-label">${g}</div><div class="card card-pad"><div class="tbl-scroll"><table>
+        <thead><tr><th>Item</th>${allYears.map(y=>`<th class="r">${y} Qty</th><th class="r">${y} ₱</th>`).join('')}</tr></thead><tbody>`;
+      items.forEach(item=>{
+        html += `<tr><td class="name">${item.name}</td>`;
+        allYears.forEach(y=>{
+          const hi = (yearFilter!=='ALL' && String(y)===String(focusYear)) ? `style="background:${C.hoverTan};"` : '';
+          html += `<td class="r num-font" ${hi}>${NUM(item['qty_'+y])}</td><td class="r num-font" ${hi}>${PHP(item['amt_'+y])}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    });
+    document.getElementById('p3-groups').innerHTML = html;
+  }
+
+  registerChart(render);
+})();
+
+/* ======================================================================
+   TIER 4 — CUSTOMERS
+   ====================================================================== */
+(function(){
+  const customers = DATA.customers;
+  const topProducts = DATA.top_products;
+  const years = DATA.customer_years;
+
+  let yearFilter = 'ALL';
+  let productFilter = 'ALL';
+
+  makePills('p4-year-pills', [{value:'ALL', label:'All Years'}, ...years.map(y=>({value:String(y), label:String(y)}))], yearFilter, (v)=>{ yearFilter=v; render(); });
+
+  const productOptions = [{value:'ALL', label:'All Products'}, ...topProducts.map(p=>({value:p.name, label:p.name}))];
+  makeSelect('p4-product-select', productOptions, productFilter, (v)=>{ productFilter=v; render(); });
+
+  function custAmount(c, product, year){
+    if (product === 'ALL'){
+      return year==='ALL' ? c.total : (c.by_year[year]||0);
+    }
+    const line = c.lines.find(l=>l.product===product);
+    if (!line) return 0;
+    return year==='ALL' ? line.total : (line.by_year[year]||0);
+  }
+  function custYearlyAmounts(c, product){
+    if (product === 'ALL') return c.by_year;
+    const line = c.lines.find(l=>l.product===product);
+    return line ? line.by_year : {};
+  }
+
+  function render(){
+    const filtered = customers
+      .map(c => ({ c, amt: custAmount(c, productFilter, yearFilter) }))
+      .filter(x => x.amt > 0)
+      .sort((a,b)=> b.amt-a.amt);
+
+    const totalRevenue = filtered.reduce((s,x)=>s+x.amt,0);
+    const top1 = filtered[0];
+    const top5Sum = filtered.slice(0,5).reduce((s,x)=>s+x.amt,0);
+    const concentration = totalRevenue ? (top5Sum/totalRevenue*100) : 0;
+
+    const scopeLabel = (productFilter==='ALL'?'':productFilter+' — ') + (yearFilter==='ALL' ? `${years[0]}–${years[years.length-1]}` : yearFilter);
+
+    document.getElementById('p4-kpis').innerHTML = `
+      <div class="card kpi" style="border-top:3px solid ${C.oliveDark};"><div class="lbl">Total Revenue</div><div class="val num-font">${PHP(totalRevenue,{compact:true})}</div><div class="delta">· ${scopeLabel}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.olive};"><div class="lbl">Active Accounts</div><div class="val num-font">${filtered.length}</div><div class="delta">· in current selection</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.ink};"><div class="lbl">Top Account</div><div class="val" style="font-size:14.5px;">${top1?top1.c.name:'—'}</div><div class="delta">· ${top1?PHP(top1.amt,{compact:true}):'—'}</div></div>
+      <div class="card kpi" style="border-top:3px solid ${C.inkSoft};"><div class="lbl">Top‑5 Concentration</div><div class="val num-font">${concentration.toFixed(0)}%</div><div class="delta">· of scoped revenue</div></div>
+    `;
+
+    document.getElementById('p4-chart1-title').textContent = `Top 12 customers`;
+    document.getElementById('p4-chart1-cap').textContent = `By sales value — ${scopeLabel}`;
+    const top12 = filtered.slice(0,12);
+    drawHBarChart('chart-cust-top', {
+      labels: top12.map(x=>x.c.name),
+      values: top12.map(x=>x.amt),
+      color: C.oliveDark,
+      valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true})
+    });
+
+    if (productFilter === 'ALL'){
+      document.getElementById('p4-chart2-title').textContent = 'Top products across customers';
+      document.getElementById('p4-chart2-cap').textContent = `By sales value — ${yearFilter==='ALL' ? 'all years' : yearFilter}`;
+      const scored = topProducts.map(p=>({name:p.name, val: yearFilter==='ALL' ? p.total : (p.by_year[yearFilter]||0)})).filter(p=>p.val>0);
+      scored.sort((a,b)=>b.val-a.val);
+      const top10p = scored.slice(0,10);
+      drawHBarChart('chart-cust-products', {
+        labels: top10p.map(p=>p.name),
+        values: top10p.map(p=>p.val),
+        color: C.olive,
+        valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true})
+      });
+    } else {
+      document.getElementById('p4-chart2-title').textContent = `${productFilter} — yearly trend`;
+      document.getElementById('p4-chart2-cap').textContent = 'Total sales value per year, all customers';
+      const prodEntry = topProducts.find(p=>p.name===productFilter);
+      const vals = prodEntry ? years.map(y=>prodEntry.by_year[y]||0) : years.map(()=>0);
+      drawBarChart('chart-cust-products', {
+        labels: years, series:[{label:productFilter, color:C.olive, data:vals}],
+        valueFmt:(v,full)=> full? PHP(v) : PHP(v,{compact:true}), legend:false,
+        highlightIndex: yearFilter==='ALL' ? null : years.indexOf(Number(yearFilter))
+      });
+    }
+
+    function renderTable(list){
+      const showProductCol = productFilter === 'ALL';
+      let html = '<thead><tr><th>#</th><th>Customer</th>' + years.map(y=>`<th class="r">${y}</th>`).join('') + '<th class="r">Total</th>' + (showProductCol?'<th>Top Product</th>':'<th class="r">Share of Acct.</th>') + '</tr></thead><tbody>';
+      list.forEach((x,i)=>{
+        const c = x.c;
+        const ya = custYearlyAmounts(c, productFilter);
+        html += `<tr>
+          <td class="rank num-font">${i+1}</td>
+          <td class="name">${c.name}</td>
+          ${years.map(y=>`<td class="r num-font">${ya[y] ? PHP(ya[y],{compact:true}) : '—'}</td>`).join('')}
+          <td class="r num-font" style="font-weight:700;">${PHP(x.amt,{compact:true})}</td>
+          ${showProductCol
+            ? `<td><span class="badge">${c.top_products[0] ? c.top_products[0][0] : '—'}</span></td>`
+            : `<td class="r num-font">${c.total ? (x.amt/c.total*100).toFixed(0)+'%' : '—'}</td>`}
+        </tr>`;
+      });
+      html += '</tbody>';
+      document.getElementById('p4-table').innerHTML = html;
+    }
+    renderTable(filtered);
+
+    document.getElementById('cust-search').oninput = (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      const list = q ? filtered.filter(x=>x.c.name.toLowerCase().includes(q)) : filtered;
+      renderTable(list);
+    };
+  }
+
+  registerChart(render);
 })();
 </script>
 </body>
